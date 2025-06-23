@@ -1,0 +1,64 @@
+﻿@page "/todo"  
+@rendermode InteractiveServer  
+
+<PageTitle>Todo</PageTitle>  
+
+<h1>Enter the task you want to do:</h1>  
+<input type="text" @bind="title" placeholder="Task title" />  
+<button class="btn btn-primary" @onclick="() => AddTodo(title)">Add Todo</button>
+
+<br />  
+<Progress Value="@UpdateProgress()" Animated Striped />  
+<br />  
+
+<Table Striped>  
+    <TableHeader>  
+        <TableRow>  
+            <TableHeaderCell>#</TableHeaderCell>  
+            <TableHeaderCell>Title</TableHeaderCell>  
+            <TableHeaderCell>Status</TableHeaderCell>  
+        </TableRow>  
+    </TableHeader>  
+    <TableBody>  
+        @foreach (var todo in todos)  
+        {  
+            <TableRow>  
+                <TableRowCell>@todos.IndexOf(todo)</TableRowCell>  
+                <TableRowCell>@todo.Title</TableRowCell>  
+                <TableRowCell>  
+                    @(todo.IsCompleted ? "Completed" : "Pending")  
+                    <Button Color="Color.Primary" Clicked="() => ChangeStatus(todos.IndexOf(todo))">Change Status</Button>  
+                </TableRowCell>  
+            </TableRow>  
+        }  
+    </TableBody>  
+</Table>  
+
+@code {
+    private List<TodoItem> todos = new List<TodoItem>();  
+    private string title = string.Empty;  
+
+    public void AddTodo(string item)  
+    {  
+        if (!string.IsNullOrWhiteSpace(item))  
+        {  
+            todos.Add(new TodoItem {Title = item, IsCompleted = false});  
+        }  
+    }  
+
+    public void ChangeStatus(int id)  
+    {  
+        todos[id].IsCompleted = !todos[id].IsCompleted;  
+    }  
+
+    public int UpdateProgress()  
+    {
+        return todos.Count(item => item.IsCompleted);
+    }  
+
+    public class TodoItem  
+    {  
+        public string Title { get; set; } = string.Empty;  
+        public bool IsCompleted { get; set; }  
+    }  
+}
