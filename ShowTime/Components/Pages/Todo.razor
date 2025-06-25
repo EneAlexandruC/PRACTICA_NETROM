@@ -25,9 +25,8 @@
             <TableRow>  
                 <TableRowCell>@todos.IndexOf(todo)</TableRowCell>  
                 <TableRowCell>@todo.Title</TableRowCell>  
-                <TableRowCell>  
-                    @(todo.IsCompleted ? "Completed" : "Pending")  
-                    <Button Color="Color.Primary" Clicked="() => ChangeStatus(todos.IndexOf(todo))">Change Status</Button>  
+                <TableRowCell>
+                    <Button Color="Color.Danger" Clicked="() => ChangeStatus(todos.IndexOf(todo))">@(todo.IsCompleted ? "Completed" : "Pending") </Button>
                 </TableRowCell>  
             </TableRow>  
         }  
@@ -35,7 +34,8 @@
 </Table>  
 
 @code {
-    private List<TodoItem> todos = new List<TodoItem>();  
+    private int progress { get; set; } = 0;
+    private readonly List<TodoItem> todos = new List<TodoItem>();  
     private string title = string.Empty;  
 
     public void AddTodo(string item)  
@@ -53,8 +53,10 @@
 
     public int UpdateProgress()  
     {
-        return todos.Count(item => item.IsCompleted);
-    }  
+        if (todos.Count == 0)
+            return 0;
+        return (int)Math.Round((double)todos.Count(item => item.IsCompleted) / todos.Count * 100);
+    }
 
     public class TodoItem  
     {  
