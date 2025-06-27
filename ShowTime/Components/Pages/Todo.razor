@@ -7,11 +7,11 @@
 <input type="text" @bind="title" placeholder="Task title" />  
 <button class="btn btn-primary" @onclick="() => AddTodo(title)">Add Todo</button>
 
-<br />  
-<Progress Value="@UpdateProgress()" Animated Striped />  
-<br />  
+<Div Style="padding-top : 10px;">
+    <Progress Value="@UpdateProgress()" Animated Striped />
+</Div>
 
-<Table Striped>  
+<Table Striped>
     <TableHeader>  
         <TableRow>  
             <TableHeaderCell>#</TableHeaderCell>  

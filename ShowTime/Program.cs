@@ -2,8 +2,28 @@ using ShowTime.Components;
 using Blazorise;
 using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
+using ShowTime.Context;
+using Microsoft.EntityFrameworkCore;
+using ShowTime.Repositories.Interfaces;
+using ShowTime.Repositories.Implementation;
+using ShowTime.Services.Interfaces;
+using ShowTime.Services.Implementation;
+using ShowTime.Services.Interfaces.BandService;
+using ShowTime.Services.Implementation.BandService;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString =
+    builder.Configuration.GetConnectionString("ShowTimeDbConnectionString")
+        ?? throw new InvalidOperationException("Connection string"
+        + "'DefaultConnection' not found.");
+
+builder.Services.AddDbContext<ShowTimeDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
+builder.Services.AddScoped<IBandService, BandService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -36,4 +56,4 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.Run();
+await app.RunAsync();
