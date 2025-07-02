@@ -1,0 +1,82 @@
+﻿@page "/admin"
+@rendermode InteractiveServer
+@inject IBandService BandService
+
+
+
+<h3>Administration pannel</h3>
+
+
+@code {
+    public List<Band> Bands { get; set; } = new List<Band>();
+
+    public string newBandName { get; set; } = string.Empty;
+    public Genre newBandGenre { get; set; } = Genre.Rock;
+
+    public int Id { get; set; } = 0;
+
+    public async Task UpdateBandAsync()
+    {
+        try
+        {
+            if (Id > 0 && !string.IsNullOrWhiteSpace(newBandName))
+            {
+                Band? entity = await BandService.GetByIdAsync(Id);
+                if (entity != null)
+                {
+                    entity.Name = newBandName;
+                    entity.Genre = newBandGenre;
+                    await BandService.UpdateAsync(entity);
+                    Bands = (await BandService.GetAllAsync()).ToList();
+                    Id = 0;
+                    newBandName = string.Empty;
+                    newBandGenre = Genre.Rock;
+                    StateHasChanged();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating band: {ex.Message}");
+        }
+    }
+
+    public async Task DeleteBandAsync()
+    {
+        try
+        {
+            if (Id > 0)
+            {
+                Band? entity = await BandService.GetByIdAsync(Id);
+                await BandService.DeleteAsync(entity!);
+                Bands = (await BandService.GetAllAsync()).ToList();
+                Id = 0;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting band: {ex.Message}");
+        }
+    }
+
+    public async Task AddBandAsync()
+    {
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(newBandName))
+            {
+                var band = new Band { Name = newBandName, Genre = newBandGenre };
+                await BandService.AddAsync(band);
+                Bands = (await BandService.GetAllAsync()).ToList();
+                newBandName = string.Empty;
+                newBandGenre = Genre.Rock;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error adding band: {ex.Message}");
+        }
+    }
+}

@@ -1,0 +1,59 @@
+﻿@page "/addbands"  
+@rendermode InteractiveServer  
+@inject IBandService BandService  
+@inject NavigationManager NavigationManager
+
+<h1>Add Bands:</h1>  
+
+<Fields>  
+    <Field>  
+        <FieldLabel>Enter the name of the band:</FieldLabel>  
+        <TextEdit Placeholder="Enter name" @bind-Text="band.Name" />  
+    </Field>  
+    <Field>  
+        <FieldLabel>Select the genre of the band:</FieldLabel>  
+        <Select TValue="Genre" @bind-SelectedValue="band.Genre">  
+            @foreach (Genre genre in Enum.GetValues(typeof(Genre)))  
+            {  
+                <SelectItem Value="@genre">@genre.ToString()</SelectItem>  
+            }  
+        </Select>  
+    </Field>  
+</Fields>  
+
+<Button Color="Color.Secondary" Clicked="InsertBand">Insert</Button>  
+<Button Color="Color.Secondary" Clicked="@(() => snackbar.Show())">Show alert</Button>
+
+<Snackbar @ref="snackbar">
+    <SnackbarBody>
+        The band has been added!
+    </SnackbarBody>
+</Snackbar>
+
+@code {
+    private Band band { get; set; } = new();
+
+    Snackbar snackbar;
+
+    public async Task InsertBand()  
+    {  
+        try  
+        {  
+            if (!string.IsNullOrWhiteSpace(band.Name))
+            {
+                await BandService.AddAsync(band);
+                await snackbar.Show();
+                StateHasChanged();
+                NavigationManager.NavigateTo("/getbands");
+            }
+        }  
+        catch (Exception ex)  
+        {  
+            Console.WriteLine($"Error inserting band: {ex.Message}");  
+        }  
+        finally  
+        {  
+            band = new Band();  
+        }  
+    }  
+}

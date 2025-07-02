@@ -1,0 +1,33 @@
+﻿@page "/getbands"
+@rendermode InteractiveServer
+@inject IBandService BandService
+
+<DataGrid TItem="Band" Data="@bands" ShowPager="true" ShowPageSizes>
+    <DataGridColumns>
+        <DataGridColumn TItem="Band" Field="Id" Caption="Id" />
+        <DataGridColumn TItem="Band" Field="Name" Caption="Name" />
+        <DataGridColumn TItem="Band" Field="Genre" Caption="Genre" />
+    </DataGridColumns>
+</DataGrid>
+
+@code {
+    private List<Band> bands = new List<Band>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBands();
+    }
+
+    private async Task LoadBands()
+    {
+        try
+        {
+            bands = (await BandService.GetAllAsync()).ToList();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching data: {ex.Message}");
+        }
+    }
+}

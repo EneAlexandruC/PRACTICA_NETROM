@@ -1,0 +1,198 @@
+﻿@page "/festivals"  
+@using System.ComponentModel.DataAnnotations  
+@rendermode InteractiveServer  
+@inject IBandService BandService  
+@inject IFestivalService FestivalService  
+
+<h3>Festivals</h3>  
+
+<DataGrid TItem="Festival" Data="@festivals" ShowPager="true" ShowPageSizes>  
+    <DataGridColumns>  
+        <DataGridColumn TItem="Festival" Field="Id" Caption="Id" />  
+        <DataGridColumn TItem="Festival" Field="Name" Caption="Name" />  
+        <DataGridColumn TItem="Festival" Field="Location" Caption="Location" />  
+        <DataGridColumn TItem="Festival" Field="StartDate" Caption="StartDate" />  
+        <DataGridColumn TItem="Festival" Field="EndDate" Caption="EndDate" />
+        <DataGridColumn TItem="Festival" Caption="Bands">
+            <DisplayTemplate>
+                @{
+                    var festival = context;
+                    var festivalBands = bands.Where(b => b.Festivals.Any(f => f.Id == festival.Id));
+                }
+                @foreach (var band in festivalBands)
+                {
+                    <span class="badge bg-primary me-1">@band.Name</span>
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+    </DataGridColumns>
+
+</DataGrid>  
+
+<Modal @ref="modalRef">  
+    <ModalContent Centered>  
+        <ModalHeader>  
+            <ModalTitle>Add Festival</ModalTitle>  
+            <CloseButton />  
+        </ModalHeader>  
+        <ModalBody>  
+            <Validation Validator="ValidationRule.IsNotEmpty">  
+                <Field>  
+                    <FieldLabel>Name</FieldLabel>  
+                    <TextEdit @bind-Text="FestivalName" Placeholder="Enter festival name..." />  
+                </Field>  
+            </Validation>  
+            <Validation Validator="ValidationRule.IsNotEmpty">  
+                <Field>  
+                    <FieldLabel>Location</FieldLabel>  
+                    <TextEdit @bind-Text="FestivalLocation" Placeholder="Enter location..." />  
+                </Field>  
+            </Validation>
+            <Validation Validator="@ValidateStartDate">
+                <Field>  
+                    <FieldLabel>Start Date</FieldLabel>  
+                    <DateEdit @bind-Date="FestivalStartDate" />  
+                </Field>
+            </Validation>
+            <Validation Validator="@ValidateEndDate">
+                <Field>  
+                    <FieldLabel>End Date</FieldLabel>  
+                    <DateEdit @bind-Date="FestivalEndDate" />  
+                </Field>
+            </Validation>
+            <Field>
+                <FieldLabel>Bands</FieldLabel>
+                    <Select TValue="int" SelectedValues="@SelectedBandIds" Multiple>
+                        @foreach (var band in bands)
+                        {
+                            <SelectItem Value="@band.Id">@band.Name</SelectItem>
+                        }
+                    </Select>
+                    @foreach (var band in bands)
+                    {
+                        <SelectItem Value="@band.Id">@band.Name</SelectItem>
+                    }
+            </Field>
+        </ModalBody>  
+        <ModalFooter>  
+            <Button Color="Color.Secondary" Clicked="@HideModal">Close</Button>  
+            <Button Color="Color.Primary" Clicked="@SaveFestival">Save</Button>  
+        </ModalFooter>  
+    </ModalContent>  
+</Modal>  
+
+<Button Color="Color.Secondary" Clicked="@ShowModal">Add Festival</Button>
+
+<Snackbar @ref="snackbar">
+    <SnackbarBody>
+        @successMessage
+    </SnackbarBody>
+</Snackbar>
+
+@code {
+    private List<Festival> festivals = new List<Festival>();  
+    private List<Band> bands = new List<Band>();  
+    private Modal modalRef = new();  
+
+    // Festival attributes  
+    public string FestivalName { get; set; } = string.Empty;  
+    public string FestivalLocation { get; set; } = string.Empty;  
+    public DateTime FestivalStartDate { get; set; } = DateTime.Now;  
+    public DateTime FestivalEndDate { get; set; } = DateTime.Now;
+    public List<int> SelectedBandIds { get; set; } = new List<int>();
+    public Snackbar snackbar;
+    private string successMessage = string.Empty;
+
+    void ValidateStartDate( ValidatorEventArgs e)
+    {
+        var startDate = Convert.ToDateTime(e.Value);
+
+        if (startDate < DateTime.Now)
+        {
+            e.Status = ValidationStatus.Error;
+        }
+        else
+        {
+            e.Status = ValidationStatus.Success;
+        }
+        StateHasChanged();
+    }
+
+    void ValidateEndDate(ValidatorEventArgs e)
+    {
+        var endDate = Convert.ToDateTime(e.Value);
+
+        if (endDate < FestivalStartDate)
+        {
+            e.Status = ValidationStatus.Error;
+        }
+        else
+        {
+            e.Status = ValidationStatus.Success;
+        }
+    }
+
+    private Task ShowModal()  
+    {  
+        // Reset selected bands when opening the modal
+        SelectedBandIds = new List<int>();
+        return modalRef.Show();  
+    }  
+
+    private Task HideModal()  
+    {  
+        return modalRef.Hide();  
+    }  
+
+    public async Task SaveFestival()  
+    {  
+        try  
+        {  
+            Festival newFestival = new Festival  
+                {  
+                    Name = FestivalName,  
+                    Location = FestivalLocation,  
+                    StartDate = FestivalStartDate,  
+                    EndDate = FestivalEndDate,
+                    Bands = bands.Where(b => SelectedBandIds.Contains(b.Id)).ToList()
+                };  
+
+            await FestivalService.AddAsync(newFestival);  
+            festivals = (await FestivalService.GetAllAsync()).ToList();  
+            bands = (await BandService.GetAllAsync()).ToList(); // Refresh bands to get updated relationships
+
+            var createdFestival = festivals.FirstOrDefault(f =>
+                f.Name == FestivalName &&
+                f.Location == FestivalLocation);
+            int festivalId = createdFestival?.Id ?? 0;
+
+            await FestivalService.AddFestivalBandAsync(festivalId, bands);
+            await HideModal();
+            successMessage = $"Festival {FestivalName} located in {FestivalLocation} has been added successfully!";
+            snackbar.Show();
+            FestivalName = string.Empty;  
+            FestivalLocation = string.Empty;  
+            FestivalStartDate = DateTime.Now;  
+            FestivalEndDate = DateTime.Now;
+            SelectedBandIds = new List<int>();
+            StateHasChanged();  
+        }  
+        catch (Exception ex)  
+        {  
+            Console.WriteLine($"Error adding festival: {ex.Message}");  
+        }  
+    }  
+
+    protected override async Task OnInitializedAsync()  
+    {  
+        try  
+        {  
+            festivals = (await FestivalService.GetAllAsync()).ToList();  
+            bands = (await BandService.GetAllAsync()).ToList();  
+        }  
+        catch (Exception ex)  
+        {  
+            Console.WriteLine($"Error fetching data: {ex.Message}");  
+        }  
+    }  
+}
