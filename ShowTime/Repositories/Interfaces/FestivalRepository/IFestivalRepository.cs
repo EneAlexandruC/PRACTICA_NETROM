@@ -4,6 +4,8 @@ namespace ShowTime.Repositories.Interfaces.FestivalRepository
 {
     public interface IFestivalRepository : IRepository<Festival>
     {
+
+        Task UpdateFestivalBandsAsync(int festivalId, IEnumerable<int> bandIds);
         Task AddFestivalBandsAsync(int festivalId, IEnumerable<int> bandIds);
         Task AddFestivalBandAsync(int festivalId, int bandId);
         Task<IEnumerable<Festival>> GetFestivalsByLocationAsync(string location);

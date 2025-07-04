@@ -6,6 +6,7 @@ namespace ShowTime.Services.Interfaces.FestivalService
     {
         Task AddFestivalBandAsync(int festivalId, int bandId);
         Task AddFestivalBandsAsync(int festivalId, IEnumerable<int> bandIds);
-
+        Task UpdateFestivalBandsAsync(int festivalId, IEnumerable<int> bandIds);
+        Task<IEnumerable<Festival>> GetFestivalsWithBandsAsync();
     }
 }

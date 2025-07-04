@@ -16,6 +16,10 @@ using ShowTime.Repositories.Implementation.BandRepository;
 using ShowTime.Repositories.Implementation.FestivalRepository;
 using ShowTime.Services.Interfaces.FestivalService;
 using ShowTime.Services.Implementation.FestivalService;
+using ShowTime.Repositories.Interfaces.BandFestivalRepository;
+using ShowTime.Repositories.Implementation.BandFestivalRepository;
+using ShowTime.Services.Implementation.BandFestivalService;
+using ShowTime.Services.Interfaces.BandFestivalService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +37,8 @@ builder.Services.AddScoped<IBandService, BandService>();
 builder.Services.AddScoped<IBandRepository, BandRepository>();
 builder.Services.AddScoped<IFestivalService, FestivalService>();
 builder.Services.AddScoped<IFestivalRepository, FestivalRepository>();
+builder.Services.AddScoped<IBandFestivalRepository, BandFestivalRepository>();
+builder.Services.AddScoped<IBandFestivalService, BandFestivalService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

@@ -84,14 +84,53 @@ namespace ShowTime.Repositories.Implementation.FestivalRepository
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<Festival>> GetFestivalsWithBandsAsync()
+        public Task<bool> IsFestivalActiveAsync(int festivalId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> IsFestivalActiveAsync(int festivalId)
+        public async Task UpdateFestivalBandsAsync(int festivalId, IEnumerable<int> bandIds)
         {
-            throw new NotImplementedException();
+            var festival = await _dbset
+                .Include(f => f.Bands)
+                .FirstOrDefaultAsync(f => f.Id == festivalId);
+
+            if (festival == null)
+                throw new ArgumentException($"Festival with ID {festivalId} not found.");
+
+            if (bandIds == null)
+            {
+                // If bandIds is null, clear all bands
+                festival.Bands.Clear();
+                return;
+            }
+
+            var distinctBandIds = bandIds.Distinct().ToList();
+            if (!distinctBandIds.Any())
+            {
+                // If the list is empty, clear all bands
+                festival.Bands.Clear();
+                return;
+            }
+
+            // Get all requested bands in a single query
+            var bandsToUpdate = await context.Bands
+                .Where(b => distinctBandIds.Contains(b.Id))
+                .ToListAsync();
+
+            if (bandsToUpdate.Count != distinctBandIds.Count)
+            {
+                var foundBandIds = bandsToUpdate.Select(b => b.Id);
+                var missingBandIds = distinctBandIds.Except(foundBandIds);
+                throw new ArgumentException($"Bands with IDs {string.Join(", ", missingBandIds)} not found.");
+            }
+
+            // Clear existing bands and add the new ones
+            festival.Bands.Clear();
+            foreach (var band in bandsToUpdate)
+            {
+                festival.Bands.Add(band);
+            }
         }
     }
 }

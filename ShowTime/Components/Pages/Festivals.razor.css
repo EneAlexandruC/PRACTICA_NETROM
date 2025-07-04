@@ -1,0 +1,15 @@
+.transferlist-modal-relative {
+    max-width: 100%;
+    overflow-x: auto;
+    max-height: 300px; 
+}
+
+.large-modal {
+    max-width: 48rem !important; /* Increased from 12rem */
+    width: 90% !important;
+}
+
+:deep(.modal-content.large-modal) {
+    max-width: 48rem !important; /* Increased from 12rem */
+    width: 90% !important;
+}

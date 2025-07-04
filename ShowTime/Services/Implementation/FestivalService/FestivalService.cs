@@ -24,5 +24,20 @@ namespace ShowTime.Services.Implementation.FestivalService
             await repository.AddFestivalBandsAsync(festivalId, bandIds);
             await repository.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Festival>> GetFestivalsWithBandsAsync()
+        {
+            return await repository.GetFestivalsWithBandsAsync();
+        }
+
+        public async Task UpdateFestivalBandsAsync(int festivalId, IEnumerable<int> bandIds)
+        {
+            if (festivalId <= 0)
+                throw new ArgumentException("Festival ID must be greater than zero.", nameof(festivalId));
+            if (bandIds == null || !bandIds.Any())
+                throw new ArgumentException("Band IDs cannot be null or empty.", nameof(bandIds));
+            await repository.UpdateFestivalBandsAsync(festivalId, bandIds);
+            await repository.SaveChangesAsync();
+        }
     }
 }

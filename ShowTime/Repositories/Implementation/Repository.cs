@@ -6,13 +6,13 @@ namespace ShowTime.Repositories.Implementation
 {
     public class Repository<T> : IRepository<T> where T : class
     {
-        private readonly ShowTimeDbContext _context;
+        protected readonly ShowTimeDbContext Context;
         private readonly DbSet<T> _dbSet;
 
         public Repository(ShowTimeDbContext context)
         {
-            _context = context;
-            _dbSet = _context.Set<T>();
+            Context = context;
+            _dbSet = Context.Set<T>();
         }
 
         public async Task AddAsync(T entity)
@@ -32,7 +32,7 @@ namespace ShowTime.Repositories.Implementation
 
         public async Task SaveChangesAsync()
         {
-            await _context.SaveChangesAsync();
+            await Context.SaveChangesAsync();
         }
         public Task UpdateAsync(T entity)
         {
