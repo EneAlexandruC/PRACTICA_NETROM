@@ -10,6 +10,6 @@ namespace ShowTime.Services.Interfaces.BandFestivalService
         Task RemoveBandFromFestivalAsync(int festivalId, int bandId);
         Task UpdateBandOrderInFestivalAsync(int festivalId, int bandId, int newOrderNo);
         Task<IEnumerable<Festival>> GetAllFestivalWithBandsInOrderAsync();
-        Task 
+        Task AddBandsToFestivalAsync(int festivalId, IEnumerable<int> bandsIds, IEnumerable<int> orderNos);
     }
 }

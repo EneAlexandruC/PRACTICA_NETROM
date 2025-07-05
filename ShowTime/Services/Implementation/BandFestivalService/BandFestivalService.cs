@@ -6,6 +6,12 @@ namespace ShowTime.Services.Implementation.BandFestivalService
 {
     public class BandFestivalService(IBandFestivalRepository repository) : Service<BandFestival>(repository), IBandFestivalService
     {
+        public async Task AddBandsToFestivalAsync(int festivalId, IEnumerable<int> bandsIds, IEnumerable<int> orderNos)
+        {
+            await repository.AddBandsToFestivalAsync(festivalId, bandsIds, orderNos);
+            await repository.SaveChangesAsync();
+        }
+
         public Task AddBandToFestivalAsync(int festivalId, int bandId, int orderNo)
         {
             throw new NotImplementedException();

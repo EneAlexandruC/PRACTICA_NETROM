@@ -10,6 +10,6 @@ namespace ShowTime.Repositories.Interfaces.BandFestivalRepository
         Task AddBandToFestivalAsync(int festivalId, int bandId, int orderNo);
         Task RemoveBandFromFestivalAsync(int festivalId, int bandId);
         Task UpdateBandOrderInFestivalAsync(int festivalId, int bandId, int newOrderNo);
-        Task AddBandsToFestivalAsync(IEnumerable<BandFestival> bandFestival);
+        Task AddBandsToFestivalAsync(int festivalId, IEnumerable<int> bandsIds, IEnumerable<int> orderNos);
     }
 }

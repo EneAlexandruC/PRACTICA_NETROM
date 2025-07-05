@@ -7,6 +7,31 @@ namespace ShowTime.Repositories.Implementation.BandFestivalRepository
 {
     public class BandFestivalRepository(ShowTimeDbContext context) : Repository<BandFestival>(context), IBandFestivalRepository
     {
+        public async Task AddBandsToFestivalAsync(int festivalId, IEnumerable<int> bandsIds, IEnumerable<int> orderNos)
+        {
+            var bandIdsList = bandsIds.ToList();
+            var orderNosList = orderNos.ToList();
+
+            if (bandIdsList.Count != orderNosList.Count)
+            {
+                throw new ArgumentException("The number of band IDs must match the number of order numbers.");
+            }
+
+            var bandFestivals = bandIdsList.Zip(orderNosList, (bandId, orderNo) => new BandFestival
+            {
+                FestivalId = festivalId,
+                BandId = bandId,
+                OrderNo = orderNo
+            });
+
+            foreach (var bandFestival in bandFestivals)
+            {
+                await Context.BandFestivals.AddAsync(bandFestival);
+            }
+
+            await Context.SaveChangesAsync();
+        }
+
         public async Task AddBandToFestivalAsync(IEnumerable<BandFestival> bandFestivals)
         {
             foreach (var bandFestival in bandFestivals)
@@ -28,9 +53,13 @@ namespace ShowTime.Repositories.Implementation.BandFestivalRepository
                 .Include(bf => bf.Festival)
                 .ToListAsync();
 
-            var orderedFestivals = bandFestivals.OrderBy(x => x.OrderNo).Select(x => x.Festival);
+            var orderedFestivals = bandFestivals
+                .OrderBy(x => x.OrderNo)
+                .Select(x => x.Festival)
+                .Where(f => f != null)
+                .Distinct();
 
-            return orderedFestivals;
+            return orderedFestivals!;
         }
 
         public async Task<IEnumerable<BandFestival>> GetBandsByFestivalIdAsync(int festivalId)

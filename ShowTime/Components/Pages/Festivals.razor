@@ -4,31 +4,74 @@
 @inject IFestivalService FestivalService
 @inject IBandFestivalService BandFestivalService
 
-<h3>Festivals</h3>
+<div class="page-header fade-in">
+    <h1><i class="fas fa-calendar-alt me-3"></i>Festivals</h1>
+    <p>Discover amazing music festivals happening around the world</p>
+</div>
 
-<Button Color="Color.Secondary" Clicked="@ShowAddModal">Add A New Festival</Button>
+<div class="mb-4">
+    <Button Color="Color.Primary" Clicked="@ShowAddModal" Class="btn-lg">
+        <i class="fas fa-plus me-2"></i>Add A New Festival
+    </Button>
+</div>
 
 <div class="mt-4">
     <Row>
         @foreach (var festival in festivals)
         {
-            <Column ColumnSize="ColumnSize.Is3.OnDesktop.Is6.OnTablet.Is12.OnMobile" Class="mb-4">
-                <Card Style="height: 100%;">
-                    <CardHeader>
-                        <CardTitle>@festival.Name</CardTitle>
-                    </CardHeader>
+            <Column ColumnSize="ColumnSize.Is4.OnDesktop.Is6.OnTablet.Is12.OnMobile" Class="mb-4">
+                <Card Style="height: 100%;" Class="festival-card">
+                    @if (!string.IsNullOrEmpty(festival.ImageUrl))
+                    {
+                        <div class="card-img-wrapper">
+                            <img src="@festival.ImageUrl" class="card-img-top festival-image" alt="@festival.Name" onerror="this.src='/images/default-festival.jpg'">
+                            <div class="card-img-overlay d-flex align-items-end">
+                                <h5 class="card-title text-white fw-bold shadow-text">@festival.Name</h5>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card-img-top festival-placeholder d-flex align-items-center justify-content-center">
+                            <div class="text-center">
+                                <i class="fas fa-calendar-alt fa-3x text-muted mb-2"></i>
+                                <h5 class="text-muted">@festival.Name</h5>
+                            </div>
+                        </div>
+                    }
+                    
                     <CardBody @onclick="() => ShowFestivalDetails(festival)" Style="cursor: pointer;">
-                        <CardText>
-                            <b>Location:</b> @festival.Location<br />
-                            <b>Dates:</b> @festival.StartDate.ToShortDateString() - @festival.EndDate.ToShortDateString()<br />
-                            <b>Bands:</b> @(festival.Bands?.Count ?? 0)
-                        </CardText>
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                <span class="fw-semibold">@festival.Location</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-calendar text-primary me-2"></i>
+                                <span>@festival.StartDate.ToShortDateString() - @festival.EndDate.ToShortDateString()</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-users text-primary me-2"></i>
+                                <span>@(festival.Bands?.Count ?? 0) Band(s)</span>
+                            </div>
+                        </div>
+                        
+                        @if (!string.IsNullOrEmpty(festival.Description))
+                        {
+                            <p class="card-text text-muted">@festival.Description</p>
+                        }
                     </CardBody>
                     <CardFooter>
-                        <ButtonGroup>
-                            <Button Color="Color.Primary" Clicked="@(() => ShowFestivalDetails(festival))" Size="Size.Small">View Bands</Button>
-                            <Button Color="Color.Secondary" Clicked="@(() => ShowEditModal(festival))" Size="Size.Small">Edit</Button>
-                            <Button Color="Color.Danger" Clicked="@(() => ShowDeleteConfirmation(festival))" Size="Size.Small">Delete</Button>
+                        <ButtonGroup Class="w-100">
+                            <Button Color="Color.Primary" Clicked="@(() => ShowFestivalDetails(festival))" Size="Size.Small">
+                                <i class="fas fa-eye me-1"></i>View Bands
+                            </Button>
+                            <Button Color="Color.Secondary" Clicked="@(() => ShowEditModal(festival))" Size="Size.Small">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </Button>
+                            <Button Color="Color.Danger" Clicked="@(() => ShowDeleteConfirmation(festival))" Size="Size.Small">
+                                <i class="fas fa-trash me-1"></i>Delete
+                            </Button>
                         </ButtonGroup>
                     </CardFooter>
                 </Card>
@@ -109,6 +152,37 @@
                         <DateEdit @bind-Date="FestivalEndDate" />
                     </Field>
                 </Validation>
+                <Field>
+                    <FieldLabel>
+                        <i class="fas fa-image me-2 text-primary"></i>Image URL
+                    </FieldLabel>
+                    <TextEdit @bind-Text="FestivalImageUrl" Placeholder="https://example.com/festival-image.jpg" />
+                    <FieldHelp>Provide a URL to an image representing the festival (optional)</FieldHelp>
+                </Field>
+                <Field>
+                    <FieldLabel>
+                        <i class="fas fa-align-left me-2 text-primary"></i>Description
+                    </FieldLabel>
+                    <MemoEdit @bind-Text="FestivalDescription" Placeholder="Describe the festival..." Rows="4" />
+                    <FieldHelp>A brief description of the festival (optional)</FieldHelp>
+                </Field>
+                
+                @if (!string.IsNullOrEmpty(FestivalImageUrl))
+                {
+                    <Field>
+                        <FieldLabel>Image Preview:</FieldLabel>
+                        <div class="text-center">
+                            <img src="@FestivalImageUrl" alt="Festival preview" class="preview-image img-thumbnail" onerror="this.style.display='none'">
+                        </div>
+                    </Field>
+                }
+                
+                <Field>
+                    <FieldLabel>
+                        <i class="fas fa-users me-2 text-primary"></i>Select Bands
+                    </FieldLabel>
+                    <FieldHelp>Choose which bands will perform at this festival</FieldHelp>
+                </Field>
                 <div class="transferlist-modal-relative">
                     <TransferList TItem="Band"
                                   Items="@bands"
@@ -167,6 +241,37 @@
                         <DateEdit @bind-Date="selectedFestival.EndDate" />
                     </Field>
                 </Validation>
+                <Field>
+                    <FieldLabel>
+                        <i class="fas fa-image me-2 text-primary"></i>Image URL
+                    </FieldLabel>
+                    <TextEdit @bind-Text="selectedFestival.ImageUrl" Placeholder="https://example.com/festival-image.jpg" />
+                    <FieldHelp>Provide a URL to an image representing the festival (optional)</FieldHelp>
+                </Field>
+                <Field>
+                    <FieldLabel>
+                        <i class="fas fa-align-left me-2 text-primary"></i>Description
+                    </FieldLabel>
+                    <MemoEdit @bind-Text="selectedFestival.Description" Placeholder="Describe the festival..." Rows="4" />
+                    <FieldHelp>A brief description of the festival (optional)</FieldHelp>
+                </Field>
+                
+                @if (!string.IsNullOrEmpty(selectedFestival.ImageUrl))
+                {
+                    <Field>
+                        <FieldLabel>Image Preview:</FieldLabel>
+                        <div class="text-center">
+                            <img src="@selectedFestival.ImageUrl" alt="Festival preview" class="preview-image img-thumbnail" onerror="this.style.display='none'">
+                        </div>
+                    </Field>
+                }
+                
+                <Field>
+                    <FieldLabel>
+                        <i class="fas fa-users me-2 text-primary"></i>Select Bands
+                    </FieldLabel>
+                    <FieldHelp>Choose which bands will perform at this festival</FieldHelp>
+                </Field>
                 <div class="transferlist-modal-relative">
                     <TransferList TItem="Band"
                                   Items="@bands"
@@ -222,6 +327,58 @@
     </SnackbarBody>
 </Snackbar>
 
+<style>
+    .festival-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .festival-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card-img-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .festival-image {
+        height: 250px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .festival-card:hover .festival-image {
+        transform: scale(1.1);
+    }
+    
+    .festival-placeholder {
+        height: 250px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .card-img-overlay {
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    }
+    
+    .shadow-text {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    
+    .preview-image {
+        max-width: 300px;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 0.75rem;
+    }
+    
+    .transferlist-modal-relative {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>
+
 @code {
     private List<Festival> festivals = new List<Festival>();
     private List<Band> bands = new List<Band>();
@@ -230,8 +387,8 @@
     private Modal editFestivalModalRef = new();
     private Modal bandDetailsModalRef = new();
     private Modal deleteModalRef = new();
-    private Validations validationsRef;
-    private Validations editValidationsRef;
+    private Validations validationsRef = default!;
+    private Validations editValidationsRef = default!;
     private Festival selectedFestival = new Festival();
     private int editFestivalId;
 
@@ -241,11 +398,13 @@
     // Festival attributes
     public string FestivalName { get; set; } = string.Empty;
     public string FestivalLocation { get; set; } = string.Empty;
+    public string FestivalImageUrl { get; set; } = string.Empty;
+    public string FestivalDescription { get; set; } = string.Empty;
     public DateTime FestivalStartDate { get; set; } = DateTime.Now;
     public DateTime FestivalEndDate { get; set; } = DateTime.Now;
     public List<int> SelectedBandIds { get; set; } = new List<int>();
     public List<Band> SelectedBands { get; set; } = new List<Band>();
-    public Snackbar snackbar;
+    public Snackbar snackbar = default!;
     private string successMessage = string.Empty;
     private string errorMessage = string.Empty;
 
@@ -297,6 +456,8 @@
         // Reset form values
         FestivalName = string.Empty;
         FestivalLocation = string.Empty;
+        FestivalImageUrl = string.Empty;
+        FestivalDescription = string.Empty;
         FestivalStartDate = DateTime.Now;
         FestivalEndDate = DateTime.Now;
         SelectedBands = new List<Band>();
@@ -415,6 +576,8 @@
                     Location = FestivalLocation,
                     StartDate = FestivalStartDate,
                     EndDate = FestivalEndDate,
+                    ImageUrl = FestivalImageUrl,
+                    Description = FestivalDescription,
                     Bands = bands.Where(b => SelectedBandIds.Contains(b.Id)).ToList()
                 };
 
@@ -425,16 +588,18 @@
 
                 int festivalId = createdFestival?.Id ?? 0;
 
-                await BandFestivalService.AddBands(festivalId, SelectedBands.Select(b => b.Id).ToList());
+                await BandFestivalService.AddBandsToFestivalAsync(festivalId, SelectedBands.Select(b => b.Id).ToList(), SelectedBands.Select((band, index) => index + 1).ToList());
 
                 // Refresh festivals list
                 festivals = (await FestivalService.GetAllAsync()).ToList();
 
                 await HideAddModal();
                 successMessage = $"Festival {FestivalName} located in {FestivalLocation} has been added successfully!";
-                snackbar.Show();
+                await snackbar.Show();
                 FestivalName = string.Empty;
                 FestivalLocation = string.Empty;
+                FestivalImageUrl = string.Empty;
+                FestivalDescription = string.Empty;
                 FestivalStartDate = DateTime.Now;
                 FestivalEndDate = DateTime.Now;
                 SelectedBandIds = new List<int>();
@@ -464,7 +629,7 @@
 
                 await HideEditModal();
                 successMessage = $"Festival {FestivalName} has been updated successfully!";
-                snackbar.Show();
+                await snackbar.Show();
                 selectedFestival = new Festival();
                 StateHasChanged();
             }
@@ -473,7 +638,7 @@
         {
             Console.WriteLine($"Error updating festival: {ex.Message}");
             errorMessage = "Error updating festival";
-            snackbar.Show();
+            await snackbar.Show();
         }
     }
     
@@ -490,7 +655,7 @@
                 
                 await HideDeleteModal();
                 successMessage = $"Festival {selectedFestival.Name} has been deleted successfully!";
-                snackbar.Show();
+                await snackbar.Show();
                 StateHasChanged();
             }
         }

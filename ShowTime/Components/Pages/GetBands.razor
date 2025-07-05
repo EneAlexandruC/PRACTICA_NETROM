@@ -2,16 +2,317 @@
 @rendermode InteractiveServer
 @inject IBandService BandService
 
-<DataGrid TItem="Band" Data="@bands" ShowPager="true" ShowPageSizes>
-    <DataGridColumns>
-        <DataGridColumn TItem="Band" Field="Id" Caption="Id" />
-        <DataGridColumn TItem="Band" Field="Name" Caption="Name" />
-        <DataGridColumn TItem="Band" Field="Genre" Caption="Genre" />
-    </DataGridColumns>
-</DataGrid>
+<div class="page-header fade-in">
+    <h1><i class="fas fa-users me-3"></i>Bands</h1>
+    <p>Discover amazing bands and their musical journeys</p>
+</div>
+
+@if (bands == null || !bands.Any())
+{
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3 text-muted">Loading bands...</p>
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var band in bands)
+        {
+            <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card band-card slide-up card-accent-border-blue">
+                    @if (!string.IsNullOrEmpty(band.ImageUrl))
+                    {
+                        <img src="@band.ImageUrl" class="card-img-top band-image" alt="@band.Name" onerror="this.src='/images/default-band.jpg'">
+                    }
+                    else
+                    {
+                        <div class="card-img-top band-placeholder d-flex align-items-center justify-content-center">
+                            <i class="fas fa-music fa-3x text-muted"></i>
+                        </div>
+                    }
+                    
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">@band.Name</h5>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <span class="badge bg-primary">
+                                <i class="fas fa-tag me-1"></i>@band.Genre
+                            </span>
+                        </div>
+                        
+                        @if (!string.IsNullOrEmpty(band.Description))
+                        {
+                            <p class="card-text text-muted">@band.Description</p>
+                        }
+                        
+                        <div class="d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    @(band.Festivals?.Count ?? 0) Festival(s)
+                                </small>
+                            </div>
+                            <div class="d-flex btn-group w-100 gap-1" role="group">
+                                <Button Color="Color.Primary" Size="Size.Small" Clicked="@(() => ShowBandDetails(band))" Class="flex-fill">
+                                    <i class="fas fa-info-circle me-1"></i>Details
+                                </Button>
+                                <Button Color="Color.Secondary" Size="Size.Small" Clicked="@(() => ShowEditModal(band))" Class="flex-fill">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </Button>
+                                <Button Color="Color.Danger" Size="Size.Small" Clicked="@(() => ShowDeleteConfirmation(band))" Class="flex-fill">
+                                    <i class="fas fa-trash me-1"></i>Delete
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Band Details Modal -->
+<Modal @ref="bandDetailsModalRef">
+    <ModalContent Size="ModalSize.Large">
+        <ModalHeader>
+            <ModalTitle>
+                <i class="fas fa-music me-2"></i>@selectedBand?.Name Details
+            </ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            @if (selectedBand != null)
+            {
+                <div class="row">
+                    <div class="col-md-4">
+                        @if (!string.IsNullOrEmpty(selectedBand.ImageUrl))
+                        {
+                            <img src="@selectedBand.ImageUrl" alt="@selectedBand.Name" class="img-fluid rounded band-detail-image">
+                        }
+                        else
+                        {
+                            <div class="band-detail-placeholder d-flex align-items-center justify-content-center">
+                                <i class="fas fa-music fa-4x text-muted"></i>
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-8">
+                        <h4 class="fw-bold">@selectedBand.Name</h4>
+                        <p><strong>Genre:</strong> <span class="badge bg-primary">@selectedBand.Genre</span></p>
+                        @if (!string.IsNullOrEmpty(selectedBand.Description))
+                        {
+                            <p><strong>Description:</strong></p>
+                            <p class="text-muted">@selectedBand.Description</p>
+                        }
+                        <p><strong>Festivals:</strong> @(selectedBand.Festivals?.Count ?? 0)</p>
+                        @if (selectedBand.Festivals != null && selectedBand.Festivals.Any())
+                        {
+                            <div class="mt-3">
+                                <h6>Performing at:</h6>
+                                @foreach (var festival in selectedBand.Festivals)
+                                {
+                                    <span class="badge bg-info me-2 mb-2">@festival.Name</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="@HideBandDetailsModal">Close</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+<!-- Edit Band Modal -->
+<Modal @ref="editBandModalRef">
+    <ModalContent Size="ModalSize.Large">
+        <ModalHeader>
+            <ModalTitle>
+                <i class="fas fa-edit me-2"></i>Edit Band
+            </ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            @if (selectedBand != null)
+            {
+                <Validations @ref="editValidationsRef" Model="@selectedBand" ValidateOnLoad="false">
+                    <Validation Validator="ValidationRule.IsNotEmpty">
+                        <Field>
+                            <FieldLabel class="fw-semibold">
+                                <i class="fas fa-tag me-2 text-primary"></i>Band Name
+                            </FieldLabel>
+                            <TextEdit @bind-Text="selectedBand.Name" Placeholder="Enter band name..." />
+                        </Field>
+                    </Validation>
+                    
+                    <Field>
+                        <FieldLabel class="fw-semibold">
+                            <i class="fas fa-guitar me-2 text-primary"></i>Genre
+                        </FieldLabel>
+                        <Select TValue="Genre" @bind-SelectedValue="selectedBand.Genre">
+                            @foreach (Genre genre in Enum.GetValues(typeof(Genre)))
+                            {
+                                <SelectItem Value="@genre">@genre.ToString()</SelectItem>
+                            }
+                        </Select>
+                    </Field>
+                    
+                    <Field>
+                        <FieldLabel class="fw-semibold">
+                            <i class="fas fa-image me-2 text-primary"></i>Image URL
+                        </FieldLabel>
+                        <TextEdit @bind-Text="selectedBand.ImageUrl" Placeholder="https://example.com/band-image.jpg" />
+                        <FieldHelp>Provide a URL to an image representing the band (optional)</FieldHelp>
+                    </Field>
+                    
+                    <Field>
+                        <FieldLabel class="fw-semibold">
+                            <i class="fas fa-align-left me-2 text-primary"></i>Description
+                        </FieldLabel>
+                        <MemoEdit @bind-Text="selectedBand.Description" Placeholder="Tell us about the band..." Rows="4" />
+                        <FieldHelp>A brief description of the band (optional)</FieldHelp>
+                    </Field>
+                    
+                    @if (!string.IsNullOrEmpty(selectedBand.ImageUrl))
+                    {
+                        <Field>
+                            <FieldLabel>Image Preview:</FieldLabel>
+                            <div class="text-center">
+                                <img src="@selectedBand.ImageUrl" alt="Band preview" class="preview-image img-thumbnail" onerror="this.style.display='none'">
+                            </div>
+                        </Field>
+                    }
+                </Validations>
+            }
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="@HideEditModal">Cancel</Button>
+            <Button Color="Color.Primary" Clicked="@UpdateBand">
+                <i class="fas fa-save me-2"></i>Update Band
+            </Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+<!-- Delete Confirmation Modal -->
+<Modal @ref="deleteModalRef">
+    <ModalContent>
+        <ModalHeader>
+            <ModalTitle>
+                <i class="fas fa-exclamation-triangle me-2 text-warning"></i>Confirm Delete
+            </ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <p>Are you sure you want to delete the band "<strong>@selectedBand?.Name</strong>"?</p>
+            <p class="text-warning">This action cannot be undone and will remove the band from all festivals.</p>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="@HideDeleteModal">Cancel</Button>
+            <Button Color="Color.Danger" Clicked="@DeleteBand">
+                <i class="fas fa-trash me-2"></i>Delete Band
+            </Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+<Snackbar @ref="snackbar" Color="SnackbarColor.Success">
+    <SnackbarBody>
+        <i class="fas fa-check-circle me-2"></i>@snackbarMessage
+    </SnackbarBody>
+</Snackbar>
+
+<style>
+    .band-card {
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .band-placeholder {
+        height: 200px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .band-image {
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+    
+    .band-detail-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+    }
+    
+    .band-detail-placeholder {
+        width: 100%;
+        height: 300px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 0.75rem;
+    }
+    
+    .preview-image {
+        max-width: 300px;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 0.75rem;
+    }
+    
+    .btn-group-sm .btn {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    /* Ensure buttons fit properly in cards */
+    .btn-group .btn {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.25rem;
+        border-radius: 0.375rem;
+    }
+    
+    .btn-group.gap-1 .btn:first-child,
+    .btn-group.gap-1 .btn:last-child {
+        border-radius: 0.375rem;
+    }
+    
+    .btn-group .btn i {
+        font-size: 0.7rem;
+    }
+    
+    /* Responsive button text */
+    @@media (max-width: 768px) {
+        .btn-group .btn {
+            font-size: 0.7rem;
+            padding: 0.4rem 0.2rem;
+        }
+        
+        .btn-group .btn .me-1 {
+            margin-right: 0.25rem !important;
+        }
+    }
+</style>
 
 @code {
     private List<Band> bands = new List<Band>();
+    private Band selectedBand = new Band();
+    private Modal bandDetailsModalRef = default!;
+    private Modal editBandModalRef = default!;
+    private Modal deleteModalRef = default!;
+    private Validations editValidationsRef = default!;
+    private Snackbar snackbar = default!;
+    private string snackbarMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -28,6 +329,90 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error fetching data: {ex.Message}");
+        }
+    }
+
+    private async Task ShowBandDetails(Band band)
+    {
+        selectedBand = band;
+        await bandDetailsModalRef.Show();
+    }
+
+    private Task HideBandDetailsModal()
+    {
+        return bandDetailsModalRef.Hide();
+    }
+
+    private async Task ShowEditModal(Band band)
+    {
+        selectedBand = new Band
+        {
+            Id = band.Id,
+            Name = band.Name,
+            Genre = band.Genre,
+            ImageUrl = band.ImageUrl,
+            Description = band.Description,
+            Festivals = band.Festivals
+        };
+        
+        if (editValidationsRef != null)
+        {
+            await editValidationsRef.ClearAll();
+        }
+        
+        await editBandModalRef.Show();
+    }
+
+    private Task HideEditModal()
+    {
+        return editBandModalRef.Hide();
+    }
+
+    private async Task ShowDeleteConfirmation(Band band)
+    {
+        selectedBand = band;
+        await deleteModalRef.Show();
+    }
+
+    private Task HideDeleteModal()
+    {
+        return deleteModalRef.Hide();
+    }
+
+    private async Task UpdateBand()
+    {
+        try
+        {
+            if (await editValidationsRef.ValidateAll())
+            {
+                await BandService.UpdateAsync(selectedBand);
+                snackbarMessage = $"Band '{selectedBand.Name}' updated successfully!";
+                await snackbar.Show();
+                await LoadBands();
+                await HideEditModal();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating band: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteBand()
+    {
+        try
+        {
+            await BandService.DeleteAsync(selectedBand);
+            snackbarMessage = $"Band '{selectedBand.Name}' deleted successfully!";
+            await snackbar.Show();
+            await LoadBands();
+            await HideDeleteModal();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting band: {ex.Message}");
         }
     }
 }

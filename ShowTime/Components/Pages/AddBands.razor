@@ -3,37 +3,113 @@
 @inject IBandService BandService  
 @inject NavigationManager NavigationManager
 
-<h1>Add Bands:</h1>  
+<div class="page-header fade-in">
+    <h1><i class="fas fa-plus-circle me-3"></i>Add New Band</h1>
+    <p>Register a new band to our platform</p>
+</div>
 
-<Fields>  
-    <Field>  
-        <FieldLabel>Enter the name of the band:</FieldLabel>  
-        <TextEdit Placeholder="Enter name" @bind-Text="band.Name" />  
-    </Field>  
-    <Field>  
-        <FieldLabel>Select the genre of the band:</FieldLabel>  
-        <Select TValue="Genre" @bind-SelectedValue="band.Genre">  
-            @foreach (Genre genre in Enum.GetValues(typeof(Genre)))  
-            {  
-                <SelectItem Value="@genre">@genre.ToString()</SelectItem>  
-            }  
-        </Select>  
-    </Field>  
-</Fields>  
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+        <div class="card shadow-lg border-0">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-music me-2"></i>Band Information</h4>
+            </div>
+            <div class="card-body p-4">
+                <Fields>  
+                    <Field>  
+                        <FieldLabel class="fw-semibold">
+                            <i class="fas fa-tag me-2 text-primary"></i>Band Name
+                        </FieldLabel>  
+                        <TextEdit Placeholder="Enter band name..." @bind-Text="band.Name" Class="form-control-lg" />  
+                    </Field>  
+                    
+                    <Field>  
+                        <FieldLabel class="fw-semibold">
+                            <i class="fas fa-guitar me-2 text-primary"></i>Genre
+                        </FieldLabel>  
+                        <Select TValue="Genre" @bind-SelectedValue="band.Genre" Class="form-control-lg">  
+                            @foreach (Genre genre in Enum.GetValues(typeof(Genre)))  
+                            {  
+                                <SelectItem Value="@genre">@genre.ToString()</SelectItem>  
+                            }  
+                        </Select>  
+                    </Field>  
+                    
+                    <Field>  
+                        <FieldLabel class="fw-semibold">
+                            <i class="fas fa-image me-2 text-primary"></i>Image URL
+                        </FieldLabel>  
+                        <TextEdit Placeholder="https://example.com/band-image.jpg" @bind-Text="band.ImageUrl" Class="form-control-lg" />  
+                        <FieldHelp>Provide a URL to an image representing the band (optional)</FieldHelp>
+                    </Field>
+                    
+                    <Field>  
+                        <FieldLabel class="fw-semibold">
+                            <i class="fas fa-align-left me-2 text-primary"></i>Description
+                        </FieldLabel>  
+                        <MemoEdit Placeholder="Tell us about the band..." @bind-Text="band.Description" Rows="4" Class="form-control-lg" />  
+                        <FieldHelp>A brief description of the band (optional)</FieldHelp>
+                    </Field>
+                </Fields>
+                
+                @if (!string.IsNullOrEmpty(band.ImageUrl))
+                {
+                    <div class="mt-4">
+                        <h6 class="fw-semibold">Image Preview:</h6>
+                        <div class="text-center">
+                            <img src="@band.ImageUrl" alt="Band preview" class="preview-image img-thumbnail" onerror="this.style.display='none'">
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            <div class="card-footer bg-transparent p-4">
+                <div class="d-flex gap-3 justify-content-end">
+                    <Button Color="Color.Secondary" Clicked="@(() => NavigationManager.NavigateTo("/getbands"))" Size="Size.Large">
+                        <i class="fas fa-arrow-left me-2"></i>Cancel
+                    </Button>
+                    <Button Color="Color.Primary" Clicked="InsertBand" Size="Size.Large">
+                        <i class="fas fa-save me-2"></i>Add Band
+                    </Button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<Button Color="Color.Secondary" Clicked="InsertBand">Insert</Button>  
-<Button Color="Color.Secondary" Clicked="@(() => snackbar.Show())">Show alert</Button>
-
-<Snackbar @ref="snackbar">
+<Snackbar @ref="snackbar" Color="SnackbarColor.Success">
     <SnackbarBody>
-        The band has been added!
+        <i class="fas fa-check-circle me-2"></i>The band has been added successfully!
     </SnackbarBody>
 </Snackbar>
+
+<style>
+    .preview-image {
+        max-width: 300px;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 0.75rem;
+    }
+    
+    .card {
+        animation: slideUp 0.5s ease-out;
+    }
+    
+    .field-label {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    
+    .form-control-lg, .form-select-lg {
+        padding: 0.75rem 1rem;
+        font-size: 1.1rem;
+    }
+</style>
 
 @code {
     private Band band { get; set; } = new();
 
-    Snackbar snackbar;
+    Snackbar snackbar = default!;
 
     public async Task InsertBand()  
     {  
@@ -44,6 +120,9 @@
                 await BandService.AddAsync(band);
                 await snackbar.Show();
                 StateHasChanged();
+                
+                // Delay navigation to show the success message
+                await Task.Delay(1500);
                 NavigationManager.NavigateTo("/getbands");
             }
         }  
