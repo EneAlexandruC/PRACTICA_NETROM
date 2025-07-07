@@ -19,8 +19,8 @@
     <Row>
         @foreach (var festival in festivals)
         {
-            <Column ColumnSize="ColumnSize.Is4.OnDesktop.Is6.OnTablet.Is12.OnMobile" Class="mb-4">
-                <Card Style="height: 100%;" Class="festival-card">
+            <Column ColumnSize="ColumnSize.Is4.OnDesktop.Is6.OnTablet.Is12.OnMobile" Class="mb-4 d-flex">
+                <Card Style="height: 100%;" Class="festival-card flex-fill">
                     @if (!string.IsNullOrEmpty(festival.ImageUrl))
                     {
                         <div class="card-img-wrapper">
@@ -94,11 +94,14 @@
                     <Row>
                         @foreach (var band in selectedFestival.Bands)
                         {
-                            <Column ColumnSize="ColumnSize.Is4.OnDesktop.Is6.OnTablet.Is12.OnMobile" Class="mb-3">
-                                <Card>
-                                    <CardBody>
+                            <Column ColumnSize="ColumnSize.Is4.OnDesktop.Is6.OnTablet.Is12.OnMobile" Class="mb-3 d-flex">
+                                <Card Style="height: 100%;" Class="flex-fill">
+                                    <CardBody Class="d-flex flex-column">
                                         <CardTitle>@band.Name</CardTitle>
-                                        <CardText>
+                                        <div class="flex-grow-1">
+                                            <CardImage Src="@band.ImageUrl" Alt="@band.Name" Class="img-fluid mb-3" onerror="this.src='/images/default-band.jpg'" />
+                                        </div>
+                                        <CardText Class="mt-auto">
                                             <Badge Color="Color.Info">@band.Genre</Badge>
                                         </CardText>
                                     </CardBody>

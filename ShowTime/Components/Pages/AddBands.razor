@@ -120,9 +120,6 @@
                 await BandService.AddAsync(band);
                 await snackbar.Show();
                 StateHasChanged();
-                
-                // Delay navigation to show the success message
-                await Task.Delay(1500);
                 NavigationManager.NavigateTo("/getbands");
             }
         }  

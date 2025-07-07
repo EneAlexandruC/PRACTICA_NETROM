@@ -7,6 +7,12 @@
     <p>Discover amazing bands and their musical journeys</p>
 </div>
 
+<div class="mb-4">
+    <Button Color="Color.Primary" Clicked="@ShowAddModal" Class="btn-lg">
+        <i class="fas fa-plus me-2"></i>Add A New Band
+    </Button>
+</div>
+
 @if (bands == null || !bands.Any())
 {
     <div class="text-center py-5">
@@ -57,7 +63,7 @@ else
                                     @(band.Festivals?.Count ?? 0) Festival(s)
                                 </small>
                             </div>
-                            <div class="d-flex btn-group w-100 gap-1" role="group">
+                            <ButtonGroup Class="w-100">
                                 <Button Color="Color.Primary" Size="Size.Small" Clicked="@(() => ShowBandDetails(band))" Class="flex-fill">
                                     <i class="fas fa-info-circle me-1"></i>Details
                                 </Button>
@@ -67,7 +73,7 @@ else
                                 <Button Color="Color.Danger" Size="Size.Small" Clicked="@(() => ShowDeleteConfirmation(band))" Class="flex-fill">
                                     <i class="fas fa-trash me-1"></i>Delete
                                 </Button>
-                            </div>
+                            </ButtonGroup>
                         </div>
                     </div>
                 </div>
@@ -223,6 +229,73 @@ else
     </ModalContent>
 </Modal>
 
+<Modal @ref="addModal">
+    <ModalContent Size="ModalSize.Large">
+        <ModalHeader>
+            <ModalTitle>
+                <i class="fas fa-plus me-2"></i>Add New Band
+            </ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <Validations @ref="addValidationsRef" Model="@newBand" ValidateOnLoad="false">
+                <Validation Validator="ValidationRule.IsNotEmpty">
+                    <Field>
+                        <FieldLabel class="fw-semibold">
+                            <i class="fas fa-tag me-2 text-primary"></i>Band Name
+                        </FieldLabel>
+                        <TextEdit Placeholder="Enter band name..." @bind-Text="newBand.Name" Class="form-control-lg" />
+                    </Field>
+                </Validation>
+
+                <Field>
+                    <FieldLabel class="fw-semibold">
+                        <i class="fas fa-guitar me-2 text-primary"></i>Genre
+                    </FieldLabel>
+                    <Select TValue="Genre" @bind-SelectedValue="newBand.Genre" Class="form-control-lg">
+                        @foreach (Genre genre in Enum.GetValues(typeof(Genre)))
+                        {
+                            <SelectItem Value="@genre">@genre.ToString()</SelectItem>
+                        }
+                    </Select>
+                </Field>
+
+                <Field>
+                    <FieldLabel class="fw-semibold">
+                        <i class="fas fa-image me-2 text-primary"></i>Image URL
+                    </FieldLabel>
+                    <TextEdit Placeholder="https://example.com/band-image.jpg" @bind-Text="newBand.ImageUrl" Class="form-control-lg" />
+                    <FieldHelp>Provide a URL to an image representing the band (optional)</FieldHelp>
+                </Field>
+
+                <Field>
+                    <FieldLabel class="fw-semibold">
+                        <i class="fas fa-align-left me-2 text-primary"></i>Description
+                    </FieldLabel>
+                    <MemoEdit Placeholder="Tell us about the band..." @bind-Text="newBand.Description" Rows="4" Class="form-control-lg" />
+                    <FieldHelp>A brief description of the band (optional)</FieldHelp>
+                </Field>
+
+                @if (!string.IsNullOrEmpty(newBand.ImageUrl))
+                {
+                    <Field>
+                        <FieldLabel>Image Preview:</FieldLabel>
+                        <div class="text-center">
+                            <img src="@newBand.ImageUrl" alt="Band preview" class="preview-image img-thumbnail" onerror="this.style.display='none'">
+                        </div>
+                    </Field>
+                }
+            </Validations>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="@HideAddModal">Cancel</Button>
+            <Button Color="Color.Primary" Clicked="@SaveBand">
+                <i class="fas fa-save me-2"></i>Add Band
+            </Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
 <Snackbar @ref="snackbar" Color="SnackbarColor.Success">
     <SnackbarBody>
         <i class="fas fa-check-circle me-2"></i>@snackbarMessage
@@ -307,10 +380,13 @@ else
 @code {
     private List<Band> bands = new List<Band>();
     private Band selectedBand = new Band();
+    private Band newBand = new Band();
     private Modal bandDetailsModalRef = default!;
     private Modal editBandModalRef = default!;
     private Modal deleteModalRef = default!;
+    private Modal addModal = default!;
     private Validations editValidationsRef = default!;
+    private Validations addValidationsRef = default!;
     private Snackbar snackbar = default!;
     private string snackbarMessage = string.Empty;
 
@@ -379,13 +455,61 @@ else
         return deleteModalRef.Hide();
     }
 
+    private async Task ShowAddModal()
+    {
+        newBand = new Band();
+        if (addValidationsRef != null)
+        {
+            await addValidationsRef.ClearAll();
+        }
+        await addModal.Show();
+    }
+
+    private Task HideAddModal()
+    {
+        return addModal.Hide();
+    }
+
+    private async Task SaveBand()
+    {
+        try
+        {
+            if (await addValidationsRef.ValidateAll())
+            {
+                await BandService.AddAsync(newBand);
+                snackbarMessage = $"Band '{newBand.Name}' added successfully!";
+                await snackbar.Show();
+                await LoadBands();
+                await HideAddModal();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error adding band: {ex.Message}");
+        }
+    }
+
     private async Task UpdateBand()
     {
         try
         {
             if (await editValidationsRef.ValidateAll())
             {
-                await BandService.UpdateAsync(selectedBand);
+                var originalBand = bands.FirstOrDefault(b => b.Id == selectedBand.Id);
+                if (originalBand != null)
+                {
+                    originalBand.Name = selectedBand.Name;
+                    originalBand.Genre = selectedBand.Genre;
+                    originalBand.ImageUrl = selectedBand.ImageUrl;
+                    originalBand.Description = selectedBand.Description;
+
+                    await BandService.UpdateAsync(originalBand);
+                }
+                else
+                {
+                    await BandService.UpdateAsync(selectedBand);
+                }
                 snackbarMessage = $"Band '{selectedBand.Name}' updated successfully!";
                 await snackbar.Show();
                 await LoadBands();

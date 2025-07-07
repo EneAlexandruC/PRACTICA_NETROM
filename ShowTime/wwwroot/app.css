@@ -146,16 +146,12 @@ a:hover,
 }
 
 .card-header {
-  background: linear-gradient(
-    135deg,
-    var(--color-burgundy) 0%,
-    var(--color-navy) 100%
-  );
-  color: var(--color-light-cream);
-  border: none;
-  padding: 2rem;
-  position: relative;
-  overflow: hidden;
+    background: white;
+    color: var(--color-charcoal);
+    border: none;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
 }
 
 .card-header::before {
@@ -175,6 +171,8 @@ a:hover,
   font-size: 1.5rem;
   position: relative;
   z-index: 1;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .card-body {
