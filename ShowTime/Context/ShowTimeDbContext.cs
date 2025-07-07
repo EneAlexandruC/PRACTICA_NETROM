@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ShowTime.Entities;
 
 namespace ShowTime.Context
 {
-    public class ShowTimeDbContext : DbContext
+    public class ShowTimeDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
     {
         public ShowTimeDbContext(DbContextOptions<ShowTimeDbContext> options) : base(options)
         {
@@ -13,14 +15,14 @@ namespace ShowTime.Context
         public DbSet<Band> Bands { get; set; } = null!;
         public DbSet<BandFestival> BandFestivals { get; set; } = null!;
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<Festival>()
+            builder.Entity<Festival>()
                 .HasMany(e => e.Bands)
                 .WithMany(e => e.Festivals)
                 .UsingEntity<BandFestival>();
+
+            base.OnModelCreating(builder);
         }
     }
 }
