@@ -1,0 +1,301 @@
+@page "/bookings"
+@rendermode InteractiveServer
+@inject IBookingService BookingService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="page-header fade-in">
+    <h1><i class="fas fa-ticket-alt me-3"></i>My Bookings</h1>
+    <p>View and manage your festival bookings</p>
+</div>
+
+<div class="container-fluid">
+    @if (bookings.Any())
+    {
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Your Bookings</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var booking in bookings)
+                        {
+                            <div class="booking-item mb-3 p-3 border rounded">
+                                <div class="row align-items-center">
+                                    <div class="col-md-3">
+                                        @if (!string.IsNullOrEmpty(booking.Festival?.ImageUrl))
+                                        {
+                                            <img src="@booking.Festival.ImageUrl" class="img-fluid rounded festival-thumbnail" alt="@booking.Festival.Name" />
+                                        }
+                                        else
+                                        {
+                                            <div class="festival-placeholder-small d-flex align-items-center justify-content-center rounded">
+                                                <i class="fas fa-calendar-alt fa-2x text-muted"></i>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="mb-2">@booking.Festival?.Name</h6>
+                                        <p class="mb-1 text-muted">
+                                            <i class="fas fa-map-marker-alt me-1"></i>@booking.Festival?.Location
+                                        </p>
+                                        <p class="mb-1 text-muted">
+                                            <i class="fas fa-calendar me-1"></i>@booking.Festival?.StartDate.ToShortDateString() - @booking.Festival?.EndDate.ToShortDateString()
+                                        </p>
+                                        <p class="mb-1 text-muted">
+                                            <i class="fas fa-clock me-1"></i>Booked on @booking.BookingDate.ToShortDateString()
+                                        </p>
+                                        <span class="badge @GetStatusBadgeClass(booking.Status)">@booking.Status</span>
+                                    </div>
+                                    <div class="col-md-3 text-end">
+                                        <Button Color="Color.Danger" Size="Size.Small" Clicked="() => CancelBooking(booking.Id)">
+                                            <i class="fas fa-times me-1"></i>Cancel
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Checkout</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="checkout-summary">
+                            <div class="summary-item d-flex justify-content-between mb-2">
+                                <span>Total Bookings:</span>
+                                <span class="fw-bold">@bookings.Count()</span>
+                            </div>
+                            <div class="summary-item d-flex justify-content-between mb-2">
+                                <span>Pending Payment:</span>
+                                <span class="fw-bold text-warning">@bookings.Count(b => b.Status == ShowTime.Enum.Status.Pending)</span>
+                            </div>
+                            <div class="summary-item d-flex justify-content-between mb-2">
+                                <span>Confirmed:</span>
+                                <span class="fw-bold text-success">@bookings.Count(b => b.Status == ShowTime.Enum.Status.Confirmed)</span>
+                            </div>
+                            <hr>
+                            <div class="summary-item d-flex justify-content-between mb-3">
+                                <span class="h6">Total Amount:</span>
+                                <span class="h6 fw-bold text-primary">$@CalculateTotal()</span>
+                            </div>
+                            @if (bookings.Any(b => b.Status == ShowTime.Enum.Status.Pending))
+                            {
+                                <Button Color="Color.Primary" Size="Size.Large" Class="w-100" Clicked="ProcessPayment" Disabled="@isProcessingPayment">
+                                    @if (isProcessingPayment)
+                                    {
+                                        <i class="fas fa-spinner fa-spin me-2"></i>@:Processing Payment
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-credit-card me-2"></i>@:Process Payment
+                                    }
+                                </Button>
+                            }
+                            else if (bookings.Any())
+                            {
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>All bookings are confirmed! No payment processing needed.
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>No bookings to process
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-ticket-alt fa-4x mb-4"></i>
+            <h4>No bookings found</h4>
+            <p style="color: #F5F5DC; opacity: 0.8;">You haven't booked any festivals yet. <a href="/festivals" style="color: #E53E3E; text-decoration: underline;">Browse festivals</a> to make your first booking!</p>
+        </div>
+    }
+</div>
+
+<Snackbar @ref="snackbar" Color="@(string.IsNullOrEmpty(errorMessage) ? SnackbarColor.Success : SnackbarColor.Danger)">
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        @successMessage
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        @errorMessage
+    }
+</Snackbar>
+
+<style>
+    .booking-item {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .booking-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .festival-thumbnail {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+    }
+    
+    .festival-placeholder-small {
+        width: 100%;
+        height: 100px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .page-header {
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .page-header p {
+        font-size: 2rem;
+        color: black;
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.8s ease-in;
+    }
+    
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .checkout-summary {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+    }
+    
+    .summary-item {
+        font-size: 0.95rem;
+    }
+</style>
+
+@code {
+    private List<Booking> bookings = new List<Booking>();
+    private ApplicationUser? currentUser;
+    public Snackbar snackbar = default!;
+    private string successMessage = string.Empty;
+    private string errorMessage = string.Empty;
+    private bool isProcessingPayment = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Get current user
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (authState.User.Identity?.IsAuthenticated == true)
+            {
+                var userIdClaim = authState.User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    currentUser = new ApplicationUser { Id = userId };
+                    bookings = (await BookingService.GetBookingsByUserIdAsync(userId)).ToList();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching bookings: {ex.Message}");
+            errorMessage = "Error loading bookings";
+        }
+    }
+
+    private string GetStatusBadgeClass(ShowTime.Enum.Status status)
+    {
+        return status switch
+        {
+            ShowTime.Enum.Status.Pending => "bg-warning",
+            ShowTime.Enum.Status.Confirmed => "bg-success",
+            ShowTime.Enum.Status.Cancelled => "bg-danger",
+            ShowTime.Enum.Status.Completed => "bg-info",
+            _ => "bg-secondary"
+        };
+    }
+
+    private decimal CalculateTotal()
+    {
+        // Mock pricing: $50 per festival - only count pending bookings for payment
+        return bookings.Count(b => b.Status == ShowTime.Enum.Status.Pending) * 50m;
+    }
+
+    private async Task CancelBooking(int bookingId)
+    {
+        try
+        {
+            await BookingService.DeleteBookingAsync(bookingId);
+            successMessage = "Booking cancelled and removed successfully!";
+            await snackbar.Show();
+            
+            // Refresh bookings
+            if (currentUser != null)
+            {
+                bookings = (await BookingService.GetBookingsByUserIdAsync(currentUser.Id)).ToList();
+            }
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error cancelling booking: {ex.Message}";
+            await snackbar.Show();
+        }
+    }
+
+    private async Task ProcessPayment()
+    {
+        try
+        {
+            isProcessingPayment = true;
+            StateHasChanged();
+            
+            // Mock payment processing
+            await Task.Delay(2000); // Simulate payment processing time
+            
+            // Get all pending bookings and confirm them
+            var pendingBookings = bookings.Where(b => b.Status == ShowTime.Enum.Status.Pending).ToList();
+            
+            foreach (var booking in pendingBookings)
+            {
+                await BookingService.ConfirmBookingAsync(booking.Id);
+            }
+            
+            successMessage = $"Payment processed successfully! {pendingBookings.Count} booking(s) confirmed.";
+            await snackbar.Show();
+            
+            // Refresh bookings to show updated status
+            if (currentUser != null)
+            {
+                bookings = (await BookingService.GetBookingsByUserIdAsync(currentUser.Id)).ToList();
+            }
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error processing payment: {ex.Message}";
+            await snackbar.Show();
+        }
+        finally
+        {
+            isProcessingPayment = false;
+            StateHasChanged();
+        }
+    }
+}

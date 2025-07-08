@@ -11,7 +11,7 @@
   --color-light-cream: #fefdf9;
   --color-dark-burgundy: #3a1f2a;
   --color-soft-red: #ff6b6b;
-  --color-muted-blue: #a8b2c0;
+  --color-muted-white: rgba(255, 255, 255, 0.8);
   --color-charcoal: #2c3e50;
 }
 
@@ -84,6 +84,21 @@ p {
   opacity: 0.9;
 }
 
+/* Close Button Styling */
+.btn-close {
+  color: white !important;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.btn-close:hover {
+  opacity: 1;
+}
+
+.btn-close:focus {
+  box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
+}
+
 /* Links */
 a,
 .btn-link {
@@ -146,12 +161,12 @@ a:hover,
 }
 
 .card-header {
-    background: white;
-    color: var(--color-charcoal);
-    border: none;
-    padding: 2rem;
-    position: relative;
-    overflow: hidden;
+  background: white;
+  color: var(--color-charcoal);
+  border: none;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .card-header::before {
@@ -717,7 +732,7 @@ a:hover,
   color: var(--color-blue-grey) !important;
 }
 .text-muted {
-  color: var(--color-muted-blue) !important;
+  color: var(--color-muted-white) !important;
 }
 .text-dark {
   color: var(--color-charcoal) !important;

@@ -11,18 +11,22 @@ using ShowTime.Repositories.Implementation;
 using ShowTime.Repositories.Implementation.BandFestivalRepository;
 using ShowTime.Repositories.Implementation.BandRepository;
 using ShowTime.Repositories.Implementation.FestivalRepository;
+using ShowTime.Repositories.Implementation.BookingRepository;
 using ShowTime.Repositories.Interfaces;
 using ShowTime.Repositories.Interfaces.BandFestivalRepository;
 using ShowTime.Repositories.Interfaces.BandRepository;
 using ShowTime.Repositories.Interfaces.FestivalRepository;
+using ShowTime.Repositories.Interfaces.BookingRepository;
 using ShowTime.Services.Implementation;
 using ShowTime.Services.Implementation.BandFestivalService;
 using ShowTime.Services.Implementation.BandService;
 using ShowTime.Services.Implementation.FestivalService;
+using ShowTime.Services.Implementation.BookingService;
 using ShowTime.Services.Interfaces;
 using ShowTime.Services.Interfaces.BandFestivalService;
 using ShowTime.Services.Interfaces.BandService;
 using ShowTime.Services.Interfaces.FestivalService;
+using ShowTime.Services.Interfaces.BookingService;
 using Showtime.Components.Account;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,6 +47,8 @@ builder.Services.AddScoped<IFestivalService, FestivalService>();
 builder.Services.AddScoped<IFestivalRepository, FestivalRepository>();
 builder.Services.AddScoped<IBandFestivalRepository, BandFestivalRepository>();
 builder.Services.AddScoped<IBandFestivalService, BandFestivalService>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IBookingService, BookingService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

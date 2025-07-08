@@ -30,42 +30,37 @@
                         <i class="fas fa-users me-2"></i>Bands
                     </NavLink>
                 </li>
-                <li class="nav-item">
-                    <NavLink class="nav-link px-3 py-2 rounded-pill mx-1" href="addbands" style="color: #F5F5DC; font-weight: 500; transition: all 0.3s ease;">
-                        <i class="fas fa-plus me-2"></i>Add Bands
-                    </NavLink>
-                </li>
-                <li class="nav-item">
-                    <NavLink class="nav-link px-3 py-2 rounded-pill mx-1" href="admin" style="color: #F5F5DC; font-weight: 500; transition: all 0.3s ease;">
-                        <i class="fas fa-cog me-2"></i>Admin
-                    </NavLink>
-                </li>
             </ul>
 
             <ul class="navbar-nav">
                 <AuthorizeView>
                     <Authorized>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle px-3 py-2 rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: #F5F5DC; font-weight: 500; border: 1px solid rgba(245, 245, 220, 0.3);" @onclick:preventDefault="true">
+                            <a class="nav-link dropdown-toggle px-3 py-2 rounded-pill user-dropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: #F5F5DC; font-weight: 500; border: 1px solid rgba(245, 245, 220, 0.3);" @onclick:preventDefault="true">
                                 <i class="fas fa-user me-2"></i>@context.User.Identity?.Name
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg" style="background: linear-gradient(145deg, #FEFDF9 0%, #F5F5DC 100%); border-radius: 1rem; margin-top: 0.5rem;">
+                            <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
                                 <li>
-                                    <NavLink class="dropdown-item py-2 px-3 rounded-3 mx-2 my-1" href="Account/Manage" style="color: #2C3E50; transition: all 0.3s ease;">
-                                        <i class="fas fa-user-circle me-2 text-primary"></i>Profile
+                                    <NavLink class="dropdown-item custom-dropdown-item" href="Account/Manage">
+                                        <i class="fas fa-user-circle me-2"></i>Profile
+                                    </NavLink>
+                                </li>
+                                <li class="nav-item">
+                                    <NavLink class="dropdown-item custom-dropdown-item" href="admin" >
+                                        <i class="fas fa-cog me-2"></i>Admin
                                     </NavLink>
                                 </li>
                                 <li>
-                                    <NavLink class="dropdown-item py-2 px-3 rounded-3 mx-2 my-1" href="Account/Manage" style="color: #2C3E50; transition: all 0.3s ease;">
-                                        <i class="fas fa-cog me-2 text-secondary"></i>Settings
+                                    <NavLink class="dropdown-item custom-dropdown-item" href="bookings">
+                                        <i class="fas fa-ticket-alt me-3"></i>Bookings
                                     </NavLink>
                                 </li>
-                                <li><hr class="dropdown-divider mx-2" style="border-color: rgba(112, 128, 144, 0.2);"></li>
+                                <li><hr class="dropdown-divider custom-divider"></li>
                                 <li>
                                     <form action="Account/Logout" method="post" enctype="application/x-www-form-urlencoded">
                                         <AntiforgeryToken />
                                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                                        <button type="submit" class="dropdown-item py-2 px-3 rounded-3 mx-2 my-1" style="color: #E53E3E; transition: all 0.3s ease; background: none; border: none; width: 100%; text-align: left;">
+                                        <button type="submit" class="dropdown-item custom-dropdown-item logout-item">
                                             <i class="fas fa-sign-out-alt me-2"></i>Logout
                                         </button>
                                     </form>
@@ -75,18 +70,18 @@
                     </Authorized>
                     <NotAuthorized>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle px-3 py-2 rounded-pill" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: #F5F5DC; font-weight: 500; border: 1px solid rgba(245, 245, 220, 0.3);" @onclick:preventDefault="true">
+                            <a class="nav-link dropdown-toggle px-3 py-2 rounded-pill user-dropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: #F5F5DC; font-weight: 500; border: 1px solid rgba(245, 245, 220, 0.3);" @onclick:preventDefault="true">
                                 <i class="fas fa-user me-2"></i>Account
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg" style="background: linear-gradient(145deg, #FEFDF9 0%, #F5F5DC 100%); border-radius: 1rem; margin-top: 0.5rem;">
+                            <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
                                 <li>
-                                    <NavLink class="dropdown-item py-2 px-3 rounded-3 mx-2 my-1" href="Account/Login" style="color: #2C3E50; transition: all 0.3s ease;">
-                                        <i class="fas fa-sign-in-alt me-2 text-primary"></i>Login
+                                    <NavLink class="dropdown-item custom-dropdown-item" href="Account/Login">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Login
                                     </NavLink>
                                 </li>
                                 <li>
-                                    <NavLink class="dropdown-item py-2 px-3 rounded-3 mx-2 my-1" href="Account/Register" style="color: #2C3E50; transition: all 0.3s ease;">
-                                        <i class="fas fa-user-plus me-2 text-success"></i>Register
+                                    <NavLink class="dropdown-item custom-dropdown-item" href="Account/Register">
+                                        <i class="fas fa-user-plus me-2"></i>Register
                                     </NavLink>
                                 </li>
                             </ul>
@@ -129,13 +124,136 @@
         box-shadow: 0 4px 8px rgba(229, 62, 62, 0.3);
     }
 
-    .dropdown-item:hover {
-        background: rgba(229, 62, 62, 0.1) !important;
-        color: #E53E3E !important;
-    }
-
     .navbar-toggler:focus {
         box-shadow: none;
+    }
+
+    /* Enhanced Dropdown Styles */
+    .user-dropdown {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(254, 253, 249, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .user-dropdown:hover {
+        background: rgba(229, 62, 62, 0.2) !important;
+        border-color: rgba(229, 62, 62, 0.7) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+    }
+
+    .custom-dropdown {
+        background: rgba(254, 253, 249, 0.98) !important;
+        backdrop-filter: blur(25px);
+        border: 2px solid rgba(229, 62, 62, 0.2) !important;
+        border-radius: 1.25rem !important;
+        box-shadow: 0 15px 50px rgba(74, 44, 58, 0.4), 0 5px 15px rgba(229, 62, 62, 0.2) !important;
+        margin-top: 0.75rem;
+        padding: 0.75rem;
+        animation: dropdownFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-origin: top right;
+        min-width: 200px;
+    }
+
+    .custom-dropdown-item {
+        color: #4A2C3A !important;
+        font-weight: 500;
+        padding: 0.875rem 1.25rem !important;
+        border-radius: 0.75rem !important;
+        margin: 0.25rem 0 !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        background: none !important;
+        border: none;
+        width: 100%;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .custom-dropdown-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(229, 62, 62, 0.1), transparent);
+        transition: left 0.5s;
+    }
+
+    .custom-dropdown-item:hover::before {
+        left: 100%;
+    }
+
+    .custom-dropdown-item:hover {
+        background: linear-gradient(135deg, rgba(229, 62, 62, 0.15) 0%, rgba(74, 44, 58, 0.1) 100%) !important;
+        color: #E53E3E !important;
+        transform: translateX(5px) scale(1.02);
+        box-shadow: 0 4px 12px rgba(229, 62, 62, 0.2);
+    }
+
+    .custom-dropdown-item i {
+        width: 20px;
+        text-align: center;
+        color: #708090;
+        transition: all 0.3s ease;
+        margin-right: 0.5rem;
+    }
+
+    .custom-dropdown-item:hover i {
+        color: #E53E3E;
+        transform: scale(1.1);
+    }
+
+    .logout-item:hover {
+        background: linear-gradient(135deg, rgba(229, 62, 62, 0.2) 0%, rgba(220, 53, 69, 0.2) 100%) !important;
+        color: #dc3545 !important;
+        border-left: 3px solid #dc3545;
+    }
+
+    .logout-item:hover i {
+        color: #dc3545;
+    }
+
+    .custom-divider {
+        border: none !important;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(229, 62, 62, 0.3), transparent) !important;
+        margin: 0.75rem 0 !important;
+        opacity: 0.7;
+    }
+
+    @@keyframes dropdownFadeIn {
+        0% {
+            opacity: 0;
+            transform: translateY(-15px) scale(0.95);
+            filter: blur(5px);
+        }
+        50% {
+            opacity: 0.8;
+            transform: translateY(-5px) scale(0.98);
+            filter: blur(2px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+        }
+    }
+
+    /* Mobile Responsiveness */
+    @@media (max-width: 768px) {
+        .custom-dropdown {
+            margin-top: 0.25rem;
+            border-radius: 0.75rem !important;
+        }
+        
+        .custom-dropdown-item {
+            padding: 0.5rem 0.75rem !important;
+        }
     }
 </style>
 

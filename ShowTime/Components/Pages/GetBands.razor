@@ -89,7 +89,7 @@ else
             <ModalTitle>
                 <i class="fas fa-music me-2"></i>@selectedBand?.Name Details
             </ModalTitle>
-            <CloseButton />
+            <CloseButton TextColor="TextColor.White"/>
         </ModalHeader>
         <ModalBody>
             @if (selectedBand != null)
@@ -143,7 +143,7 @@ else
             <ModalTitle>
                 <i class="fas fa-edit me-2"></i>Edit Band
             </ModalTitle>
-            <CloseButton />
+            <CloseButton TextColor="TextColor.White"/>
         </ModalHeader>
         <ModalBody>
             @if (selectedBand != null)
@@ -214,7 +214,7 @@ else
             <ModalTitle>
                 <i class="fas fa-exclamation-triangle me-2 text-warning"></i>Confirm Delete
             </ModalTitle>
-            <CloseButton />
+            <CloseButton TextColor="TextColor.White"/>
         </ModalHeader>
         <ModalBody>
             <p>Are you sure you want to delete the band "<strong>@selectedBand?.Name</strong>"?</p>
@@ -235,7 +235,7 @@ else
             <ModalTitle>
                 <i class="fas fa-plus me-2"></i>Add New Band
             </ModalTitle>
-            <CloseButton />
+            <CloseButton TextColor="TextColor.White"/>
         </ModalHeader>
         <ModalBody>
             <Validations @ref="addValidationsRef" Model="@newBand" ValidateOnLoad="false">
@@ -374,6 +374,11 @@ else
         .btn-group .btn .me-1 {
             margin-right: 0.25rem !important;
         }
+    }
+
+    .page-header p {
+        font-size: 2rem;
+        color: black;
     }
 </style>
 

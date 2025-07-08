@@ -38,117 +38,31 @@
     </div>
 </div>
 
-<div class="features-section py-6">
-    <div class="container">
-        <div class="row text-center mb-6">
-            <div class="col-12">
-                <h2 class="display-4 fw-bold mb-4" style="color: #2C3E50;">Why Choose ShowTime?</h2>
-                <p class="lead" style="color: #708090; font-size: 1.2rem;">Everything you need to manage your music festival experience with sophistication</p>
-            </div>
-        </div>
-        
-        <div class="row g-5">
-            <div class="col-lg-4 col-md-6">
-                <div class="feature-card card h-100 slide-up">
-                    <div class="card-body text-center p-5">
-                        <div class="feature-icon mb-4">
-                            <i class="fas fa-calendar-check fa-4x" style="color: #E53E3E;"></i>
-                        </div>
-                        <h4 class="fw-bold mb-3" style="color: #2C3E50;">Festival Management</h4>
-                        <p style="color: #708090; line-height: 1.6;">Orchestrate and manage music festivals with our sophisticated, intuitive interface designed for professionals.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-4 col-md-6">
-                <div class="feature-card card h-100 slide-up" style="animation-delay: 0.2s;">
-                    <div class="card-body text-center p-5">
-                        <div class="feature-icon mb-4">
-                            <i class="fas fa-guitar fa-4x" style="color: #4A2C3A;"></i>
-                        </div>
-                        <h4 class="fw-bold mb-3" style="color: #2C3E50;">Artist Discovery</h4>
-                        <p style="color: #708090; line-height: 1.6;">Discover exceptional bands and seamlessly connect them with the perfect festivals and audiences.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-4 col-md-6">
-                <div class="feature-card card h-100 slide-up" style="animation-delay: 0.4s;">
-                    <div class="card-body text-center p-5">
-                        <div class="feature-icon mb-4">
-                            <i class="fas fa-chart-line fa-4x" style="color: #708090;"></i>
-                        </div>
-                        <h4 class="fw-bold mb-3" style="color: #2C3E50;">Analytics & Insights</h4>
-                        <p style="color: #708090; line-height: 1.6;">Gain comprehensive insights and detailed analytics about your events, performances, and audience engagement.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="stats-section py-6">
-    <div class="container">
-        <div class="row text-center">
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="stat-item">
-                    <h3 class="display-4 fw-bold" style="color: #E53E3E;">250+</h3>
-                    <p style="color: #708090; font-weight: 500;">Festivals Managed</p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="stat-item">
-                    <h3 class="display-4 fw-bold" style="color: #4A2C3A;">1,500+</h3>
-                    <p style="color: #708090; font-weight: 500;">Artists Connected</p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="stat-item">
-                    <h3 class="display-4 fw-bold" style="color: #708090;">50k+</h3>
-                    <p style="color: #708090; font-weight: 500;">Happy Attendees</p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="stat-item">
-                    <h3 class="display-4 fw-bold" style="color: #2F3349;">99%</h3>
-                    <p style="color: #708090; font-weight: 500;">Satisfaction Rate</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="cta-section py-6">
-    <div class="container">
-        <div class="row justify-content-center text-center">
-            <div class="col-lg-8">
-                <div class="cta-content fade-in">
-                    <h2 class="display-4 fw-bold mb-4" style="color: #FEFDF9; text-shadow: 0 4px 8px rgba(0,0,0,0.3);">Ready to Elevate Your Experience?</h2>
-                    <p class="lead mb-5" style="color: #F5F5DC; font-size: 1.2rem; line-height: 1.7; opacity: 0.9;">
-                        Join thousands of festival organizers and music enthusiasts who trust ShowTime for their most important events.
-                    </p>
-                    <div class="d-flex gap-4 justify-content-center flex-wrap">
-                        <a href="/admin" class="btn btn-danger btn-lg px-5 py-3" style="font-weight: 600; letter-spacing: 0.025em;">
-                            <i class="fas fa-rocket me-3"></i>Start Managing
-                        </a>
-                        <a href="/festivals" class="btn btn-outline-light btn-lg px-5 py-3" style="font-weight: 600; letter-spacing: 0.025em; border-width: 2px;">
-                            <i class="fas fa-calendar me-3"></i>View Festivals
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <style>
+    .page-content {
+        background: none !important;
+        margin-top: 0 !important;
+        min-height: auto !important;
+    }
+
+    .main-content {
+        padding: 0 !important;
+        min-height: auto !important;
+    }
+
+    .container-fluid {
+        padding: 0 !important;
+        max-width: none !important;
+    }
+
     .hero-section {
         background: linear-gradient(135deg, #1c0610 0%, #2F3349 50%, #3A1F2A 100%);
-        min-height: 90vh;
+        min-height: 100vh;
         display: flex;
         align-items: center;
         position: relative;
         overflow: hidden;
+        margin-top: 76px; /* Account for fixed navbar */
     }
     
     .hero-section::before {
@@ -340,6 +254,7 @@
         
         .hero-section {
             min-height: 100vh;
+            margin-top: 56px; 
         }
         
         .feature-card .card-body {

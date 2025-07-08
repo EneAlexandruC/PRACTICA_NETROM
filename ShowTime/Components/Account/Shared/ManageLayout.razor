@@ -1,17 +1,88 @@
 ﻿@inherits LayoutComponentBase
 @layout AccountLayout
 
-<h1>Manage your account</h1>
-
 <div>
-    <h2>Change your account settings</h2>
-    <hr />
-    <div class="row">
-        <div class="col-md-3">
-            <ManageNavMenu />
-        </div>
-        <div class="col-md-9">
-            @Body
+    <div class="page-header fade-in">
+        <h1 class="display-4 fw-bold mb-3" style="color: #FEFDF9; text-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+            <i class="fas fa-user-cog me-3" style="color: #E53E3E;"></i>Manage your account
+        </h1>
+        <p class="lead" style="color: #F5F5DC; opacity: 0.9;">Change your account settings</p>
+    </div>
+    
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="manage-nav-container">
+                    <ManageNavMenu />
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="manage-content">
+                    @Body
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .manage-account-container {
+        background: linear-gradient(135deg, #cb259c 0%, #3f0a41 100%);
+        min-height: 100vh;
+        padding-top: 76px;
+    }
+    
+    .page-header {
+        text-align: center;
+        padding: 3rem 0;
+        background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 100%);
+        backdrop-filter: blur(10px);
+        margin-bottom: 2rem;
+    }
+    
+    .manage-nav-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .manage-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.8s ease-in;
+    }
+    
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @@media (max-width: 768px) {
+        .manage-account-container {
+            padding-top: 56px;
+        }
+        
+        .container {
+            padding: 0 1rem;
+        }
+        
+        .page-header {
+            padding: 2rem 1rem;
+        }
+        
+        .manage-nav-container,
+        .manage-content {
+            margin-bottom: 1rem;
+        }
+    }
+</style>

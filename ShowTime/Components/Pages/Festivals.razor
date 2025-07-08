@@ -3,6 +3,8 @@
 @inject IBandService BandService
 @inject IFestivalService FestivalService
 @inject IBandFestivalService BandFestivalService
+@inject IBookingService BookingService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div class="page-header fade-in">
     <h1><i class="fas fa-calendar-alt me-3"></i>Festivals</h1>
@@ -20,7 +22,7 @@
         @foreach (var festival in festivals)
         {
             <Column ColumnSize="ColumnSize.Is4.OnDesktop.Is6.OnTablet.Is12.OnMobile" Class="mb-4 d-flex">
-                <Card Style="height: 100%;" Class="festival-card flex-fill">
+                <Card Style="height: 100%;" Class="festival-card fade-in flex-fill">
                     @if (!string.IsNullOrEmpty(festival.ImageUrl))
                     {
                         <div class="card-img-wrapper">
@@ -62,17 +64,22 @@
                         }
                     </CardBody>
                     <CardFooter>
-                        <ButtonGroup Class="w-100">
-                            <Button Color="Color.Primary" Clicked="@(() => ShowFestivalDetails(festival))" Size="Size.Small">
-                                <i class="fas fa-eye me-1"></i>View Bands
+                        <div class="d-flex flex-column gap-2">
+                            <div class="d-flex gap-2">
+                                <Button Color="Color.Primary" Clicked="@(() => ShowFestivalDetails(festival))" Size="Size.Small" Class="flex-fill">
+                                    <i class="fas fa-eye me-1"></i>View Bands
+                                </Button>
+                                <Button Color="Color.Secondary" Clicked="@(() => ShowEditModal(festival))" Size="Size.Small" Class="flex-fill">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </Button>
+                                <Button Color="Color.Danger" Clicked="@(() => ShowDeleteConfirmation(festival))" Size="Size.Small" Class="flex-fill">
+                                    <i class="fas fa-trash me-1"></i>Delete
+                                </Button>
+                            </div>
+                            <Button Color="Color.Success" Clicked="@(() => BookFestival(festival))" Size="Size.Small" Class="w-100">
+                                <i class="fas fa-ticket-alt me-1"></i>Book Festival
                             </Button>
-                            <Button Color="Color.Secondary" Clicked="@(() => ShowEditModal(festival))" Size="Size.Small">
-                                <i class="fas fa-edit me-1"></i>Edit
-                            </Button>
-                            <Button Color="Color.Danger" Clicked="@(() => ShowDeleteConfirmation(festival))" Size="Size.Small">
-                                <i class="fas fa-trash me-1"></i>Delete
-                            </Button>
-                        </ButtonGroup>
+                        </div>
                     </CardFooter>
                 </Card>
             </Column>
@@ -85,7 +92,7 @@
     <ModalContent Size="ModalSize.Large">
         <ModalHeader>
             <ModalTitle>Bands at @selectedFestival?.Name</ModalTitle>
-            <CloseButton />
+            <CloseButton TextColor="TextColor.White"/>
         </ModalHeader>
         <ModalBody>
             @if (selectedFestival?.Bands != null && selectedFestival.Bands.Any())
@@ -127,7 +134,7 @@
     <ModalContent Size="ModalSize.Large">
         <ModalHeader>
             <ModalTitle>Add Festival</ModalTitle>
-            <CloseButton />
+            <CloseButton TextColor="TextColor.White"/>
         </ModalHeader>
         <ModalBody>
             <Validations @ref="validationsRef" Model="@festivalModel" ValidateOnLoad="false">
@@ -216,7 +223,7 @@
     <ModalContent Size="ModalSize.Large">
         <ModalHeader>
             <ModalTitle>Edit Festival</ModalTitle>
-            <CloseButton />
+            <CloseButton TextColor="TextColor.White"/>
         </ModalHeader>
         <ModalBody>
             <Validations @ref="editValidationsRef" Model="@festivalModel" ValidateOnLoad="false">
@@ -305,7 +312,7 @@
     <ModalContent>
         <ModalHeader>
             <ModalTitle>Confirm Delete</ModalTitle>
-            <CloseButton />
+            <CloseButton TextColor="TextColor.White"/>
         </ModalHeader>
         <ModalBody>
             <p>Are you sure you want to delete the festival "<strong>@selectedFestival?.Name</strong>"?</p>
@@ -380,6 +387,11 @@
         max-height: 400px;
         overflow-y: auto;
     }
+
+    .page-header p {
+        font-size: 2rem;
+        color: black;
+    }
 </style>
 
 @code {
@@ -394,6 +406,7 @@
     private Validations editValidationsRef = default!;
     private Festival selectedFestival = new Festival();
     private int editFestivalId;
+    private ApplicationUser? currentUser;
 
     // Model for validation
     private Festival festivalModel = new Festival();
@@ -668,10 +681,54 @@
         }
     }
 
+    private async Task BookFestival(Festival festival)
+    {
+        try
+        {
+            if (currentUser == null)
+            {
+                errorMessage = "Please login to book festivals";
+                await snackbar.Show();
+                return;
+            }
+
+            // Check if user has already booked this festival
+            var alreadyBooked = await BookingService.HasUserBookedFestivalAsync(currentUser.Id, festival.Id);
+            if (alreadyBooked)
+            {
+                errorMessage = "You have already booked this festival";
+                await snackbar.Show();
+                return;
+            }
+
+            // Create booking
+            await BookingService.CreateBookingAsync(currentUser.Id, festival.Id);
+            successMessage = $"Successfully booked {festival.Name}! Check your bookings to complete the purchase.";
+            await snackbar.Show();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error booking festival: {ex.Message}";
+            await snackbar.Show();
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            // Get current user
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (authState.User.Identity?.IsAuthenticated == true)
+            {
+                var userIdClaim = authState.User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    // Create a minimal user object for booking purposes
+                    currentUser = new ApplicationUser { Id = userId };
+                }
+            }
+
             festivals = (await BandFestivalService.GetAllFestivalWithBandsInOrderAsync()).ToList();
             bands = (await BandService.GetAllAsync()).ToList();
         }
