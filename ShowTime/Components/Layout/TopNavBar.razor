@@ -45,16 +45,24 @@
                                         <i class="fas fa-user-circle me-2"></i>Profile
                                     </NavLink>
                                 </li>
-                                <li class="nav-item">
-                                    <NavLink class="dropdown-item custom-dropdown-item" href="admin" >
-                                        <i class="fas fa-cog me-2"></i>Admin
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink class="dropdown-item custom-dropdown-item" href="bookings">
-                                        <i class="fas fa-ticket-alt me-3"></i>Bookings
-                                    </NavLink>
-                                </li>
+                                <AuthorizeView Roles="Admin" Context="adminContext">
+                                    <Authorized>
+                                        <li class="nav-item">
+                                            <NavLink class="dropdown-item custom-dropdown-item" href="admin" >
+                                                <i class="fas fa-cog me-2"></i>Admin
+                                            </NavLink>
+                                        </li>
+                                    </Authorized>
+                                </AuthorizeView>
+                                <AuthorizeView Roles="Admin, User" Context="userContext">
+                                    <Authorized>
+                                        <li>
+                                            <NavLink class="dropdown-item custom-dropdown-item" href="bookings">
+                                                <i class="fas fa-ticket-alt me-3"></i>My Bookings
+                                            </NavLink>
+                                        </li>
+                                    </Authorized>
+                                </AuthorizeView>
                                 <li><hr class="dropdown-divider custom-divider"></li>
                                 <li>
                                     <form action="Account/Logout" method="post" enctype="application/x-www-form-urlencoded">

@@ -11,11 +11,15 @@
     <p>Discover amazing music festivals happening around the world</p>
 </div>
 
-<div class="mb-4">
-    <Button Color="Color.Primary" Clicked="@ShowAddModal" Class="btn-lg">
-        <i class="fas fa-plus me-2"></i>Add A New Festival
-    </Button>
-</div>
+<AuthorizeView Roles="Admin" Context="adminContext">
+    <Authorized>
+        <div class="mb-4">
+            <Button Color="Color.Primary" Clicked="@ShowAddModal" Class="btn-lg">
+                <i class="fas fa-plus me-2"></i>Add A New Festival
+            </Button>
+        </div>
+    </Authorized>
+</AuthorizeView>
 
 <div class="mt-4">
     <Row>
@@ -65,20 +69,26 @@
                     </CardBody>
                     <CardFooter>
                         <div class="d-flex flex-column gap-2">
-                            <div class="d-flex gap-2">
-                                <Button Color="Color.Primary" Clicked="@(() => ShowFestivalDetails(festival))" Size="Size.Small" Class="flex-fill">
-                                    <i class="fas fa-eye me-1"></i>View Bands
-                                </Button>
-                                <Button Color="Color.Secondary" Clicked="@(() => ShowEditModal(festival))" Size="Size.Small" Class="flex-fill">
-                                    <i class="fas fa-edit me-1"></i>Edit
-                                </Button>
-                                <Button Color="Color.Danger" Clicked="@(() => ShowDeleteConfirmation(festival))" Size="Size.Small" Class="flex-fill">
-                                    <i class="fas fa-trash me-1"></i>Delete
-                                </Button>
-                            </div>
-                            <Button Color="Color.Success" Clicked="@(() => BookFestival(festival))" Size="Size.Small" Class="w-100">
-                                <i class="fas fa-ticket-alt me-1"></i>Book Festival
+                            <Button Color="Color.Primary" Clicked="@(() => ShowFestivalDetails(festival))" Size="Size.Small" Class="flex-fill">
+                                <i class="fas fa-eye me-1"></i>View Bands
                             </Button>
+                            <AuthorizeView Roles="Admin, User" Context="userContext">
+                                <Authorized>
+                                    <Button Color="Color.Success" Clicked="@(() => BookFestival(festival))" Size="Size.Small" Class="w-100">
+                                        <i class="fas fa-ticket-alt me-1"></i>Book Festival
+                                    </Button>
+                                </Authorized>
+                            </AuthorizeView>
+                            <AuthorizeView Roles="Admin" Context="adminContext">
+                                <Authorized>
+                                    <Button Color="Color.Secondary" Clicked="@(() => ShowEditModal(festival))" Size="Size.Small" Class="flex-fill">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </Button>
+                                    <Button Color="Color.Danger" Clicked="@(() => ShowDeleteConfirmation(festival))" Size="Size.Small" Class="flex-fill">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </Button>
+                                </Authorized>
+                            </AuthorizeView>
                         </div>
                     </CardFooter>
                 </Card>

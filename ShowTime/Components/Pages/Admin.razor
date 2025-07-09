@@ -1,8 +1,8 @@
 ﻿@page "/admin"
+@using Microsoft.AspNetCore.Authorization
 @rendermode InteractiveServer
 @inject IBandService BandService
-
-
+@attribute [Authorize(Roles = "Admin")]
 
 <h3>Administration pannel</h3>
 

@@ -14,57 +14,205 @@
 
 <PageTitle>Log in</PageTitle>
 
-<h1>Log in</h1>
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <StatusMessage Message="@errorMessage" />
-            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator />
-                <h2>Use a local account to log in.</h2>
-                <hr />
-                <Microsoft.AspNetCore.Components.Forms.ValidationSummary class="text-danger" role="alert" />
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label for="email" class="form-label">Email</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label for="password" class="form-label">Password</label>
-                    <ValidationMessage For="() => Input.Password" class="text-danger" />
-                </div>
-                <div class="checkbox mb-3">
-                    <label class="form-label">
-                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
-                        Remember me
-                    </label>
-                </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <div>
-                    <p>
-                        <a href="Account/ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
-            </EditForm>
-        </section>
+<div>
+    <div class="page-header fade-in">
+        <h1 class="display-4 fw-bold mb-3" style="color: #FEFDF9; text-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+            <i class="fas fa-sign-in-alt me-3" style="color: #E53E3E;"></i>Welcome Back
+        </h1>
+        <p class="lead" style="color: #F5F5DC; opacity: 0.9;">Sign in to your ShowTime account</p>
     </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
+    
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="auth-card">
+                    <StatusMessage Message="@errorMessage" />
+                    <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+                        <DataAnnotationsValidator />
+                        <h2 class="auth-title">
+                            <i class="fas fa-user-circle me-2"></i>Sign In
+                        </h2>
+                        <hr class="auth-divider" />
+                        <Microsoft.AspNetCore.Components.Forms.ValidationSummary class="text-danger" role="alert" />
+                        
+                        <div class="form-floating mb-3">
+                            <InputText @bind-Value="Input.Email" class="form-control auth-input" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                            <label for="email" class="form-label">Email</label>
+                            <ValidationMessage For="() => Input.Email" class="text-danger" />
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <InputText type="password" @bind-Value="Input.Password" class="form-control auth-input" autocomplete="current-password" aria-required="true" placeholder="password" />
+                            <label for="password" class="form-label">Password</label>
+                            <ValidationMessage For="() => Input.Password" class="text-danger" />
+                        </div>
+                        
+                        <div class="checkbox mb-3">
+                            <label class="form-label auth-checkbox-label">
+                                <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input me-2" />
+                                Remember me
+                            </label>
+                        </div>
+                        
+                        <div>
+                            <button type="submit" class="w-100 btn btn-lg auth-btn-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </button>
+                        </div>
+                        
+                        <div class="auth-links">
+                            <p>
+                                <a href="Account/ForgotPassword" class="auth-link">
+                                    <i class="fas fa-key me-1"></i>Forgot your password?
+                                </a>
+                            </p>
+                            <p>
+                                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))" class="auth-link">
+                                    <i class="fas fa-user-plus me-1"></i>Register as a new user
+                                </a>
+                            </p>
+                            <p>
+                                <a href="Account/ResendEmailConfirmation" class="auth-link">
+                                    <i class="fas fa-envelope me-1"></i>Resend email confirmation
+                                </a>
+                            </p>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-5">
+                <div class="auth-card">
+                    <h3 class="auth-title">
+                        <i class="fas fa-external-link-alt me-2"></i>External Login
+                    </h3>
+                    <hr class="auth-divider" />
+                    <ExternalLoginPicker />
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+    .auth-container {
+        background: linear-gradient(135deg, #cb259c 0%, #3f0a41 100%);
+        min-height: 100vh;
+        padding-top: 76px;
+    }
+    
+    .page-header {
+        text-align: center;
+        padding: 3rem 0;
+        background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 100%);
+        backdrop-filter: blur(10px);
+        margin-bottom: 2rem;
+    }
+    
+    .auth-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 2rem;
+    }
+    
+    .auth-title {
+        color: #4A2C3A;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .auth-divider {
+        border-color: rgba(229, 62, 62, 0.3);
+        margin: 1.5rem 0;
+    }
+    
+    .auth-input {
+        border: 2px solid rgba(74, 44, 58, 0.2);
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .auth-input:focus {
+        border-color: #E53E3E;
+        box-shadow: 0 0 0 0.2rem rgba(229, 62, 62, 0.25);
+    }
+    
+    .auth-checkbox-label {
+        color: #4A2C3A;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+    }
+    
+    .auth-btn-primary {
+        background: linear-gradient(135deg, #E53E3E 0%, #4A2C3A 100%);
+        border: none;
+        border-radius: 0.5rem;
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+    }
+    
+    .auth-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(229, 62, 62, 0.4);
+        background: linear-gradient(135deg, #4A2C3A 0%, #E53E3E 100%);
+    }
+    
+    .auth-links {
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+    
+    .auth-links p {
+        margin: 0.5rem 0;
+    }
+    
+    .auth-link {
+        color: #E53E3E;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .auth-link:hover {
+        color: #4A2C3A;
+        text-decoration: underline;
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.8s ease-in;
+    }
+    
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @@media (max-width: 768px) {
+        .auth-container {
+            padding-top: 56px;
+        }
+        
+        .container {
+            padding: 0 1rem;
+        }
+        
+        .page-header {
+            padding: 2rem 1rem;
+        }
+        
+        .auth-card {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
 
 @code {
     private string? errorMessage;
