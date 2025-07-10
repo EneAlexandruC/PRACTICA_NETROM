@@ -9,7 +9,7 @@
     <p>See statistics about festivals</p>
 </div>
 
-<Container Fluid>
+<Container Fluid class="fade-in">
     @if (isLoading)
     {
         <Row>
@@ -24,7 +24,7 @@
     {
         <Row>
             <Column>
-                <Card>
+                <Card class="page-header">
                     <CardHeader>
                         <CardTitle>
                             <Icon Name="IconName.Calendar" Margin="Margin.Is2.FromEnd" />
@@ -53,7 +53,8 @@
                                  Sortable  
                                  Filterable="false"
                                  RowClicked="OnFestivalRowClicked"  
-                                 RowHoverCursor="@GetRowHoverCursor">  
+                                 RowHoverCursor="@GetRowHoverCursor"
+                                 class="page-header">
                             <DataGridColumns>  
                                 <DataGridColumn Field="@nameof(Festival.Name)" Caption="Festival Name" />  
                                 <DataGridColumn Field="@nameof(Festival.Location)" Caption="Location" />  
@@ -97,7 +98,6 @@
     }
 </Container>
 
-@* Full Page Modal - Moved outside Container *@
 @if (selectedFestival != null)
 {
     <Modal @ref="bookingModal" Class="fullpage-modal">
@@ -114,7 +114,7 @@
                     @if (selectedFestival.Bookings.Any())
                     {
                         <DataGrid TItem="Booking" 
-                                 Data="@selectedFestival.Bookings.OrderByDescending(b => b.BookingDate)" 
+                                 Data="@selectedFestival.Bookings.OrderByDescending(b => b.BookingDate)"
                                  Responsive 
                                  ShowPager
                                  PageSize="15"

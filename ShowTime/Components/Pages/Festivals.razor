@@ -13,7 +13,7 @@
 
 <AuthorizeView Roles="Admin" Context="adminContext">
     <Authorized>
-        <div class="mb-4">
+        <div class="mb-4 fade-in">
             <Button Color="Color.Primary" Clicked="@ShowAddModal" Class="btn-lg">
                 <i class="fas fa-plus me-2"></i>Add A New Festival
             </Button>
@@ -39,7 +39,7 @@
                 </TextEdit>
             </Field>
         </Column>
-        <Column ColumnSize="ColumnSize.Is3">
+        <Column ColumnSize="ColumnSize.Is1" Style="padding-top: 0.4rem;">
             <Field>
                 <FieldLabel>&nbsp;</FieldLabel>
                 <Button Color="Color.Secondary" Clicked="ClearSearch" Class="w-100">

@@ -465,11 +465,7 @@ a:hover,
 
 /* Page Header */
 .page-header {
-  background: linear-gradient(
-    145deg,
-    rgba(254, 253, 249, 0.95) 0%,
-    rgba(245, 245, 220, 0.9) 100%
-  );
+  background: white;
   backdrop-filter: blur(20px);
   border-radius: 1.5rem;
   padding: 3rem;

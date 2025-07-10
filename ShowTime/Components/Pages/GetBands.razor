@@ -9,7 +9,7 @@
 
 <AuthorizeView Roles="Admin" Context="adminContext">
     <Authorized>
-        <div class="mb-4">
+        <div class="mb-4 fade-in">
             <Button Color="Color.Primary" Clicked="@ShowAddModal" Class="btn-lg">
                 <i class="fas fa-plus me-2"></i>Add A New Band
             </Button>
@@ -35,7 +35,7 @@
                 </TextEdit>
             </Field>
         </Column>
-        <Column ColumnSize="ColumnSize.Is3">
+        <Column ColumnSize="ColumnSize.Is1" Style="padding-top: 0.4rem;">
             <Field>
                 <FieldLabel>&nbsp;</FieldLabel>
                 <Button Color="Color.Secondary" Clicked="ClearSearch" Class="w-100">
@@ -226,7 +226,7 @@ else
         <ModalBody>
             @if (selectedBand != null)
             {
-                <Validations @ref="editValidationsRef" Model="@selectedBand" ValidateOnLoad="false">
+                <Validations @ref="editValidationsRef">
                     <Validation Validator="ValidationRule.IsNotEmpty">
                         <Field>
                             <FieldLabel class="fw-semibold">
@@ -278,9 +278,12 @@ else
         </ModalBody>
         <ModalFooter>
             <Button Color="Color.Secondary" Clicked="@HideEditModal">Cancel</Button>
-            <Button Color="Color.Primary" Clicked="@UpdateBand">
+            <Button Color="Color.Primary" Clicked="@UpdateBand" Disabled="@isEditSaveDisabled">
                 <i class="fas fa-save me-2"></i>Update Band
             </Button>
+            @code {
+                private bool isEditSaveDisabled => !editValidationsRef?.ValidateAll().Result ?? true;
+            }
         </ModalFooter>
     </ModalContent>
 </Modal>
@@ -367,9 +370,12 @@ else
         </ModalBody>
         <ModalFooter>
             <Button Color="Color.Secondary" Clicked="@HideAddModal">Cancel</Button>
-            <Button Color="Color.Primary" Clicked="@SaveBand">
+            <Button Color="Color.Primary" Clicked="@SaveBand" Disabled="@isAddSaveDisabled">
                 <i class="fas fa-save me-2"></i>Add Band
             </Button>
+            @code{
+                private bool isAddSaveDisabled => !addValidationsRef?.ValidateAll().Result ?? true;
+            }
         </ModalFooter>
     </ModalContent>
 </Modal>
