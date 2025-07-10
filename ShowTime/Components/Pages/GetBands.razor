@@ -17,6 +17,35 @@
     </Authorized>
 </AuthorizeView>
 
+<!-- Search Bar -->
+<div class="mb-4 fade-in">
+    <Row>
+        <Column ColumnSize="ColumnSize.Is6">
+            <Field>
+                <FieldLabel style="color: white;">
+                    <i class="fas fa-search me-2 text-primary" style="color: white !important;"></i>Search Bands
+                </FieldLabel>
+                <TextEdit @bind-Text="searchTerm"
+                         Placeholder="Search by band name or genre..." 
+                         @oninput="OnSearchChanged" 
+                         Class="search-input">
+                    <Feedback>
+                        <ValidationNone />
+                    </Feedback>
+                </TextEdit>
+            </Field>
+        </Column>
+        <Column ColumnSize="ColumnSize.Is3">
+            <Field>
+                <FieldLabel>&nbsp;</FieldLabel>
+                <Button Color="Color.Secondary" Clicked="ClearSearch" Class="w-100">
+                    <i class="fas fa-times me-2"></i>Clear
+                </Button>
+            </Field>
+        </Column>
+    </Row>
+</div>
+
 @if (bands == null || !bands.Any())
 {
     <div class="text-center py-5">
@@ -26,10 +55,20 @@
         <p class="mt-3 text-muted">Loading bands...</p>
     </div>
 }
+else if (!PaginatedBands.Any())
+{
+    <div class="text-center py-5">
+        <Icon Name="IconName.Search" Size="IconSize.x3" TextColor="TextColor.Muted" Margin="Margin.Is3.FromBottom" />
+        <Heading Size="HeadingSize.Is4" TextColor="TextColor.Muted">No bands found</Heading>
+        <Paragraph TextColor="TextColor.Muted">
+            Try adjusting your search criteria or clear the filters.
+        </Paragraph>
+    </div>
+}
 else
 {
     <div class="row">
-        @foreach (var band in bands)
+        @foreach (var band in PaginatedBands)
         {
             <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-4">
                 <div class="card band-card slide-up card-accent-border-blue">
@@ -45,7 +84,7 @@ else
                     }
                     
                     <div class="card-header">
-                        <h5 class="card-title mb-0">@band.Name</h5>
+                        <h5 class="card-title mb-0" style="color: var(--color-charcoal) !important; text-shadow: none !important;">@band.Name</h5>
                     </div>
                     
                     <div class="card-body">
@@ -88,6 +127,38 @@ else
             </div>
         }
     </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <div>
+            <Text TextColor="TextColor.Muted" Style="color: white !important;">
+                Showing @Math.Min((currentPage - 1) * pageSize + 1, FilteredBands.Count()) to @Math.Min(currentPage * pageSize, FilteredBands.Count()) of @FilteredBands.Count() bands
+            </Text>
+        </div>
+        <Pagination>
+            <PaginationItem Disabled="@(currentPage == 1)">
+                <PaginationLink Clicked="@(() => GoToPage(currentPage - 1))">
+                    <Icon Name="IconName.ChevronLeft" />
+                </PaginationLink>
+            </PaginationItem>
+
+            @for (int pageNo = Math.Max(1, currentPage - 2); pageNo <= TotalPages; pageNo++)
+            {
+                int pageNumber = pageNo;
+                <PaginationItem Active="@(pageNo == currentPage)">
+                    <PaginationLink Clicked="@(() => GoToPage(pageNumber))">
+                        @pageNumber
+                    </PaginationLink>
+                </PaginationItem>
+            }
+
+            <PaginationItem Disabled="@(currentPage == TotalPages)">
+                <PaginationLink Clicked="@(() => GoToPage(currentPage + 1))">
+                    <Icon Name="IconName.ChevronRight" />
+                </PaginationLink>
+            </PaginationItem>
+        </Pagination>
+    </div>
 }
 
 <!-- Band Details Modal -->
@@ -123,7 +194,6 @@ else
                             <p><strong>Description:</strong></p>
                             <p class="text-muted">@selectedBand.Description</p>
                         }
-                        <p><strong>Festivals:</strong> @(selectedBand.Festivals?.Count ?? 0)</p>
                         @if (selectedBand.Festivals != null && selectedBand.Festivals.Any())
                         {
                             <div class="mt-3">
@@ -315,78 +385,116 @@ else
         height: 100%;
         transition: all 0.3s ease;
     }
-    
+
     .band-placeholder {
         height: 200px;
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     }
-    
+
     .band-image {
         height: 200px;
         object-fit: cover;
     }
-    
+
     .card:hover {
         transform: translateY(-10px);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     }
-    
+
     .band-detail-image {
         width: 100%;
         height: 300px;
         object-fit: cover;
     }
-    
+
     .band-detail-placeholder {
         width: 100%;
         height: 300px;
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border-radius: 0.75rem;
     }
-    
+
     .preview-image {
         max-width: 300px;
         max-height: 200px;
         object-fit: cover;
         border-radius: 0.75rem;
     }
-    
+
     .btn-group-sm .btn {
         font-size: 0.75rem;
         padding: 0.25rem 0.5rem;
     }
-    
+
     /* Ensure buttons fit properly in cards */
     .btn-group .btn {
         font-size: 0.75rem;
         padding: 0.5rem 0.25rem;
         border-radius: 0.375rem;
     }
-    
+
     .btn-group.gap-1 .btn:first-child,
     .btn-group.gap-1 .btn:last-child {
         border-radius: 0.375rem;
     }
-    
+
     .btn-group .btn i {
         font-size: 0.7rem;
     }
-    
+
     /* Responsive button text */
     @@media (max-width: 768px) {
         .btn-group .btn {
             font-size: 0.7rem;
             padding: 0.4rem 0.2rem;
         }
-        
         .btn-group .btn .me-1 {
             margin-right: 0.25rem !important;
         }
     }
 
-    .page-header p {
-        font-size: 2rem;
-        color: black;
+    /* Search input styling */
+    .search-input {
+        border-radius: 1rem;
+        padding: 0.75rem 1rem;
+        border: 2px solid rgba(112, 128, 144, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: var(--color-red);
+        box-shadow: 0 0 0 0.25rem rgba(229, 62, 62, 0.15);
+    }
+
+    /* Pagination styling */
+    .pagination {
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .pagination .page-link {
+        border: none;
+        background: rgba(254, 253, 249, 0.9);
+        color: var(--color-charcoal);
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        background: var(--color-red);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: var(--color-red);
+        color: white;
+        box-shadow: 0 4px 8px rgba(229, 62, 62, 0.3);
+    }
+
+    .pagination .page-item.disabled .page-link {
+        background: rgba(112, 128, 144, 0.2);
+        color: var(--color-muted-white);
     }
 </style>
 
@@ -403,6 +511,25 @@ else
     private Snackbar snackbar = default!;
     private string snackbarMessage = string.Empty;
 
+    // Pagination and Search
+    private string searchTerm = string.Empty;
+    private Genre? selectedGenre = null;
+    private int currentPage = 1;
+    private readonly int pageSize = 6;
+
+    private IEnumerable<Band> FilteredBands =>
+        bands.Where(b =>
+            (string.IsNullOrEmpty(searchTerm) ||
+             b.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+             b.Genre.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+             (!string.IsNullOrEmpty(b.Description) && b.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))) &&
+            (!selectedGenre.HasValue || b.Genre == selectedGenre.Value));
+
+    private IEnumerable<Band> PaginatedBands =>
+        FilteredBands.Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+    private int TotalPages => (int)Math.Ceiling((double)FilteredBands.Count() / pageSize);
+
     protected override async Task OnInitializedAsync()
     {
         await LoadBands();
@@ -418,6 +545,36 @@ else
         catch (Exception ex)
         {
             Console.WriteLine($"Error fetching data: {ex.Message}");
+        }
+    }
+
+    private async Task OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+        currentPage = 1; // Reset to first page when searching
+        await Task.CompletedTask;
+    }
+
+    private async Task OnGenreChanged()
+    {
+        currentPage = 1; // Reset to first page when filtering
+        await Task.CompletedTask;
+    }
+
+    private async Task ClearSearch()
+    {
+        searchTerm = string.Empty;
+        selectedGenre = null;
+        currentPage = 1;
+        await Task.CompletedTask;
+    }
+
+    private async Task GoToPage(int page)
+    {
+        if (page >= 1 && page <= TotalPages)
+        {
+            currentPage = page;
+            await Task.CompletedTask;
         }
     }
 

@@ -132,5 +132,13 @@ namespace ShowTime.Repositories.Implementation.FestivalRepository
                 festival.Bands.Add(band);
             }
         }
+
+        public async Task<IEnumerable<Festival>> GetFestivalsWithBookingsAsync()
+        {
+            return await _dbset
+                .Include(f => f.Bookings)
+                    .ThenInclude(b => b.User)
+                .ToListAsync();
+        }
     }
 }

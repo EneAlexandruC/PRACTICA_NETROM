@@ -13,5 +13,6 @@ namespace ShowTime.Repositories.Interfaces.FestivalRepository
         Task<IEnumerable<Festival>> GetFestivalsWithBandsAsync();
         Task<bool> IsFestivalActiveAsync(int festivalId);
         Task<IEnumerable<Festival>> GetFestivalsByNameAsync(string name);
+        Task<IEnumerable<Festival>> GetFestivalsWithBookingsAsync();
     }
 }

@@ -30,6 +30,11 @@ namespace ShowTime.Services.Implementation.FestivalService
             return await repository.GetFestivalsWithBandsAsync();
         }
 
+        public async Task<IEnumerable<Festival>> GetFestivalsWithBookingsAsync()
+        {
+            return await repository.GetFestivalsWithBookingsAsync();
+        }
+
         public async Task UpdateFestivalBandsAsync(int festivalId, IEnumerable<int> bandIds)
         {
             if (festivalId <= 0)

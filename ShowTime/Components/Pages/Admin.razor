@@ -1,82 +1,276 @@
 ﻿@page "/admin"
 @using Microsoft.AspNetCore.Authorization
 @rendermode InteractiveServer
-@inject IBandService BandService
+@inject IFestivalService FestivalService
 @attribute [Authorize(Roles = "Admin")]
 
-<h3>Administration pannel</h3>
+<div class="page-header fade-in">
+    <h1><i class="fas fa-calendar-alt me-3"></i>Admin Dashboard</h1>
+    <p>See statistics about festivals</p>
+</div>
 
+<Container Fluid>
+    @if (isLoading)
+    {
+        <Row>
+            <Column>
+                <Div Class="d-flex justify-content-center">
+                    <SpinKit Type="SpinKitType.Circle" Color="Color.Primary" />
+                </Div>
+            </Column>
+        </Row>
+    }
+    else if (Festivals.Any())
+    {
+        <Row>
+            <Column>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>
+                            <Icon Name="IconName.Calendar" Margin="Margin.Is2.FromEnd" />
+                            Festivals & Bookings
+                        </CardTitle>
+                    </CardHeader>
+                    <CardBody>
+                        @* Custom Filter for Festival Name *@
+                        <Row Margin="Margin.Is3.FromBottom">
+                            <Column ColumnSize="ColumnSize.Is6">
+                                <Field>
+                                    <FieldLabel>Filter by Festival Name</FieldLabel>
+                                    <TextEdit @bind-Text="festivalNameFilter" 
+                                             Placeholder="Search festivals..." 
+                                             @oninput="OnFestivalNameFilterChanged" />
+                                </Field>
+                            </Column>
+                        </Row>
+
+                        @* Festival DataGrid *@
+                        <DataGrid TItem="Festival"  
+                                 Data="@GetFilteredFestivals()"  
+                                 Responsive  
+                                 ShowPager  
+                                 PageSize="10"  
+                                 Sortable  
+                                 Filterable="false"
+                                 RowClicked="OnFestivalRowClicked"  
+                                 RowHoverCursor="@GetRowHoverCursor">  
+                            <DataGridColumns>  
+                                <DataGridColumn Field="@nameof(Festival.Name)" Caption="Festival Name" />  
+                                <DataGridColumn Field="@nameof(Festival.Location)" Caption="Location" />  
+                                <DataGridColumn Field="@nameof(Festival.StartDate)" Caption="Start Date">  
+                                    <DisplayTemplate>  
+                                        @context.StartDate.ToString("MMM dd, yyyy")  
+                                    </DisplayTemplate>  
+                                </DataGridColumn>  
+                                <DataGridColumn Field="@nameof(Festival.EndDate)" Caption="End Date">  
+                                    <DisplayTemplate>  
+                                        @context.EndDate.ToString("MMM dd, yyyy")  
+                                    </DisplayTemplate>  
+                                </DataGridColumn>  
+                                <DataGridColumn Field="@nameof(Festival.Bookings)" Caption="Bookings" Sortable="false" Filterable="false">  
+                                    <DisplayTemplate>  
+                                        <Badge Color="Color.Primary">  
+                                            @context.Bookings.Count bookings  
+                                        </Badge>  
+                                    </DisplayTemplate>  
+                                </DataGridColumn>  
+                            </DataGridColumns>  
+                        </DataGrid>  
+                    </CardBody>
+                </Card>
+            </Column>
+        </Row>
+    }
+    else
+    {
+        <Row>
+            <Column>
+                <Div Class="text-center" Padding="Padding.Is5.OnY">
+                    <Icon Name="IconName.Calendar" Size="IconSize.x3" TextColor="TextColor.Muted" Margin="Margin.Is3.FromBottom" />
+                    <Heading Size="HeadingSize.Is5" TextColor="TextColor.Muted">No festivals found</Heading>
+                    <Paragraph TextColor="TextColor.Muted">
+                        There are no festivals to display at the moment.
+                    </Paragraph>
+                </Div>
+            </Column>
+        </Row>
+    }
+</Container>
+
+@* Full Page Modal - Moved outside Container *@
+@if (selectedFestival != null)
+{
+    <Modal @ref="bookingModal" Class="fullpage-modal">
+        <ModalContent Size="ModalSize.Fullscreen">
+            <ModalHeader>
+                <ModalTitle>
+                    <Icon Name="IconName.Calendar" Margin="Margin.Is2.FromEnd" />
+                    Bookings for @selectedFestival.Name
+                </ModalTitle>
+                <CloseButton />
+            </ModalHeader>
+            <ModalBody>
+                <Container Fluid>
+                    @if (selectedFestival.Bookings.Any())
+                    {
+                        <DataGrid TItem="Booking" 
+                                 Data="@selectedFestival.Bookings.OrderByDescending(b => b.BookingDate)" 
+                                 Responsive 
+                                 ShowPager
+                                 PageSize="15"
+                                 Sortable>
+                            <DataGridColumns>
+                                <DataGridColumn Field="@nameof(Booking.Id)" Caption="Booking ID" Sortable="false" Filterable="false">
+                                    <DisplayTemplate>
+                                        <Badge Color="Color.Secondary">#@context.Id</Badge>
+                                    </DisplayTemplate>
+                                </DataGridColumn>
+                                <DataGridColumn Field="@nameof(Booking.User)" Caption="User" Sortable="false">
+                                    <DisplayTemplate>
+                                        @if (context.User != null)
+                                        {
+                                            <Div>
+                                                <Strong>@context.User.UserName</Strong>
+                                                <br>
+                                                <Small TextColor="TextColor.Muted">@context.User.Email</Small>
+                                            </Div>
+                                        }
+                                        else
+                                        {
+                                            <Badge Color="Color.Warning">User not found</Badge>
+                                        }
+                                    </DisplayTemplate>
+                                </DataGridColumn>
+                                <DataGridColumn Field="@nameof(Booking.Event)" Caption="Event" />
+                                <DataGridColumn Field="@nameof(Booking.BookingDate)" Caption="Booking Date">
+                                    <DisplayTemplate>
+                                        <Small>@context.BookingDate.ToString("MMM dd, yyyy HH:mm")</Small>
+                                    </DisplayTemplate>
+                                </DataGridColumn>
+                                <DataGridColumn Field="@nameof(Booking.Status)" Caption="Status">
+                                    <DisplayTemplate>
+                                        <Badge Color="@GetStatusBadgeColor(context.Status)">
+                                            @context.Status
+                                        </Badge>
+                                    </DisplayTemplate>
+                                </DataGridColumn>
+                            </DataGridColumns>
+                        </DataGrid>
+                    }
+                    else
+                    {
+                        <Div Class="text-center" Padding="Padding.Is5.OnY">
+                            <Icon Name="IconName.CalendarTimes" Size="IconSize.x3" TextColor="TextColor.Muted" Margin="Margin.Is3.FromBottom" />
+                            <Heading Size="HeadingSize.Is4" TextColor="TextColor.Muted">No bookings found</Heading>
+                            <Paragraph TextColor="TextColor.Muted">
+                                No bookings have been made for this festival yet.
+                            </Paragraph>
+                        </Div>
+                    }
+                </Container>
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="CloseBookingModal">
+                    <Icon Name="IconName.Times" Margin="Margin.Is2.FromEnd" />
+                    Close
+                </Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+}
+
+<style>
+    .table th {
+        background: white;
+    }
+
+    .fullpage-modal .modal-dialog {
+        max-width: 100%;
+        margin: 0;
+        height: 100vh;
+    }
+    
+    .fullpage-modal .modal-content {
+        height: 100vh;
+        border-radius: 0;
+        border: none;
+    }
+    
+    .fullpage-modal .modal-body {
+        flex: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+    }
+</style>
 
 @code {
-    public List<Band> Bands { get; set; } = new List<Band>();
+    public List<Festival> Festivals { get; set; } = [];
+    private bool isLoading = true;
+    private Festival? selectedFestival;
+    private Modal? bookingModal;
+    private string festivalNameFilter = string.Empty;
 
-    public string newBandName { get; set; } = string.Empty;
-    public Genre newBandGenre { get; set; } = Genre.Rock;
+    private List<Festival> GetFilteredFestivals()
+    {
+        return string.IsNullOrWhiteSpace(festivalNameFilter)
+            ? Festivals
+            : Festivals.Where(f => f.Name.Contains(festivalNameFilter, StringComparison.OrdinalIgnoreCase))
+                      .ToList();
+    }
 
-    public int Id { get; set; } = 0;
-
-    public async Task UpdateBandAsync()
+    protected override async Task OnInitializedAsync()
     {
         try
         {
-            if (Id > 0 && !string.IsNullOrWhiteSpace(newBandName))
-            {
-                Band? entity = await BandService.GetByIdAsync(Id);
-                if (entity != null)
-                {
-                    entity.Name = newBandName;
-                    entity.Genre = newBandGenre;
-                    await BandService.UpdateAsync(entity);
-                    Bands = (await BandService.GetAllAsync()).ToList();
-                    Id = 0;
-                    newBandName = string.Empty;
-                    newBandGenre = Genre.Rock;
-                    StateHasChanged();
-                }
-            }
+            Festivals = (await FestivalService.GetFestivalsWithBookingsAsync()).ToList();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error updating band: {ex.Message}");
+            Console.WriteLine($"Error loading festivals: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 
-    public async Task DeleteBandAsync()
+    private async Task OnFestivalNameFilterChanged(ChangeEventArgs e)
     {
-        try
+        festivalNameFilter = e.Value?.ToString() ?? string.Empty;
+        await Task.CompletedTask;
+    }
+
+    private async Task OnFestivalRowClicked(DataGridRowMouseEventArgs<Festival> eventArgs)
+    {
+        selectedFestival = eventArgs.Item;
+        if (bookingModal != null)
         {
-            if (Id > 0)
-            {
-                Band? entity = await BandService.GetByIdAsync(Id);
-                await BandService.DeleteAsync(entity!);
-                Bands = (await BandService.GetAllAsync()).ToList();
-                Id = 0;
-                StateHasChanged();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error deleting band: {ex.Message}");
+            await bookingModal.Show();
         }
     }
 
-    public async Task AddBandAsync()
+    private async Task CloseBookingModal()
     {
-        try
+        if (bookingModal != null)
         {
-            if (!string.IsNullOrWhiteSpace(newBandName))
-            {
-                var band = new Band { Name = newBandName, Genre = newBandGenre };
-                await BandService.AddAsync(band);
-                Bands = (await BandService.GetAllAsync()).ToList();
-                newBandName = string.Empty;
-                newBandGenre = Genre.Rock;
-                StateHasChanged();
-            }
+            await bookingModal.Hide();
         }
-        catch (Exception ex)
+    }
+
+    private Cursor GetRowHoverCursor(Festival festival)
+    {
+        return Cursor.Pointer;
+    }
+
+    private Color GetStatusBadgeColor(Status status)
+    {
+        return status switch
         {
-            Console.WriteLine($"Error adding band: {ex.Message}");
-        }
+            Status.Confirmed => Color.Success,
+            Status.Pending => Color.Warning,
+            Status.Cancelled => Color.Danger,
+            Status.Completed => Color.Info,
+            _ => Color.Secondary
+        };
     }
 }

@@ -21,81 +21,164 @@
     </Authorized>
 </AuthorizeView>
 
-<div class="mt-4">
+<!-- Search Bar -->
+<div class="mb-4 fade-in">
     <Row>
-        @foreach (var festival in festivals)
-        {
-            <Column ColumnSize="ColumnSize.Is4.OnDesktop.Is6.OnTablet.Is12.OnMobile" Class="mb-4 d-flex">
-                <Card Style="height: 100%;" Class="festival-card fade-in flex-fill">
-                    @if (!string.IsNullOrEmpty(festival.ImageUrl))
-                    {
-                        <div class="card-img-wrapper">
-                            <img src="@festival.ImageUrl" class="card-img-top festival-image" alt="@festival.Name" onerror="this.src='/images/default-festival.jpg'">
-                            <div class="card-img-overlay d-flex align-items-end">
-                                <h5 class="card-title text-white fw-bold shadow-text">@festival.Name</h5>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="card-img-top festival-placeholder d-flex align-items-center justify-content-center">
-                            <div class="text-center">
-                                <i class="fas fa-calendar-alt fa-3x text-muted mb-2"></i>
-                                <h5 class="text-muted">@festival.Name</h5>
-                            </div>
-                        </div>
-                    }
-                    
-                    <CardBody @onclick="() => ShowFestivalDetails(festival)" Style="cursor: pointer;">
-                        <div class="mb-3">
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                                <span class="fw-semibold">@festival.Location</span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="fas fa-calendar text-primary me-2"></i>
-                                <span>@festival.StartDate.ToShortDateString() - @festival.EndDate.ToShortDateString()</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-users text-primary me-2"></i>
-                                <span>@(festival.Bands?.Count ?? 0) Band(s)</span>
-                            </div>
-                        </div>
-                        
-                        @if (!string.IsNullOrEmpty(festival.Description))
-                        {
-                            <p class="card-text text-muted">@festival.Description</p>
-                        }
-                    </CardBody>
-                    <CardFooter>
-                        <div class="d-flex flex-column gap-2">
-                            <Button Color="Color.Primary" Clicked="@(() => ShowFestivalDetails(festival))" Size="Size.Small" Class="flex-fill">
-                                <i class="fas fa-eye me-1"></i>View Bands
-                            </Button>
-                            <AuthorizeView Roles="Admin, User" Context="userContext">
-                                <Authorized>
-                                    <Button Color="Color.Success" Clicked="@(() => BookFestival(festival))" Size="Size.Small" Class="w-100">
-                                        <i class="fas fa-ticket-alt me-1"></i>Book Festival
-                                    </Button>
-                                </Authorized>
-                            </AuthorizeView>
-                            <AuthorizeView Roles="Admin" Context="adminContext">
-                                <Authorized>
-                                    <Button Color="Color.Secondary" Clicked="@(() => ShowEditModal(festival))" Size="Size.Small" Class="flex-fill">
-                                        <i class="fas fa-edit me-1"></i>Edit
-                                    </Button>
-                                    <Button Color="Color.Danger" Clicked="@(() => ShowDeleteConfirmation(festival))" Size="Size.Small" Class="flex-fill">
-                                        <i class="fas fa-trash me-1"></i>Delete
-                                    </Button>
-                                </Authorized>
-                            </AuthorizeView>
-                        </div>
-                    </CardFooter>
-                </Card>
-            </Column>
-        }
+        <Column ColumnSize="ColumnSize.Is6">
+            <Field>
+                <FieldLabel style="color: white;">
+                    <i class="fas fa-search me-2 text-primary" style="color: white !important;"></i>Search Festivals
+                </FieldLabel>
+                <TextEdit @bind-Text="searchTerm" 
+                         Placeholder="Search by festival name, location, or description..." 
+                         @oninput="OnSearchChanged" 
+                         Class="search-input">
+                    <Feedback>
+                        <ValidationNone />
+                    </Feedback>
+                </TextEdit>
+            </Field>
+        </Column>
+        <Column ColumnSize="ColumnSize.Is3">
+            <Field>
+                <FieldLabel>&nbsp;</FieldLabel>
+                <Button Color="Color.Secondary" Clicked="ClearSearch" Class="w-100">
+                    <i class="fas fa-times me-2"></i>Clear
+                </Button>
+            </Field>
+        </Column>
     </Row>
 </div>
+
+@if (festivals == null || !festivals.Any())
+{
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3 text-muted">Loading festivals...</p>
+    </div>
+}
+else if (!PaginatedFestivals.Any())
+{
+    <div class="text-center py-5">
+        <Icon Name="IconName.Search" Size="IconSize.x3" TextColor="TextColor.Muted" Margin="Margin.Is3.FromBottom" />
+        <Heading Size="HeadingSize.Is4" TextColor="TextColor.Muted">No festivals found</Heading>
+        <Paragraph TextColor="TextColor.Muted">
+            Try adjusting your search criteria or clear the filters.
+        </Paragraph>
+    </div>
+}
+else
+{
+    <div class="mt-4">
+        <Row>
+            @foreach (var festival in PaginatedFestivals)
+            {
+                <Column ColumnSize="ColumnSize.Is4.OnDesktop.Is6.OnTablet.Is12.OnMobile" Class="mb-4 d-flex">
+                    <Card Style="height: 100%;" Class="festival-card fade-in flex-fill">
+                        @if (!string.IsNullOrEmpty(festival.ImageUrl))
+                        {
+                            <div class="card-img-wrapper">
+                                <img src="@festival.ImageUrl" class="card-img-top festival-image" alt="@festival.Name" onerror="this.src='/images/default-festival.jpg'">
+                                <div class="card-img-overlay d-flex align-items-end">
+                                    <h5 class="card-title text-white fw-bold shadow-text">@festival.Name</h5>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card-img-top festival-placeholder d-flex align-items-center justify-content-center">
+                                <div class="text-center">
+                                    <i class="fas fa-calendar-alt fa-3x text-muted mb-2"></i>
+                                    <h5 class="text-muted">@festival.Name</h5>
+                                </div>
+                            </div>
+                        }
+                        
+                        <CardBody @onclick="() => ShowFestivalDetails(festival)" Style="cursor: pointer;">
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                    <span class="fw-semibold">@festival.Location</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-calendar text-primary me-2"></i>
+                                    <span>@festival.StartDate.ToShortDateString() - @festival.EndDate.ToShortDateString()</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-users text-primary me-2"></i>
+                                    <span>@(festival.Bands?.Count ?? 0) Band(s)</span>
+                                </div>
+                            </div>
+                            
+                            @if (!string.IsNullOrEmpty(festival.Description))
+                            {
+                                <p class="card-text text-muted">@festival.Description</p>
+                            }
+                        </CardBody>
+                        <CardFooter>
+                            <ButtonGroup Class="w-100">
+                                <Button Color="Color.Primary" Clicked="@(() => ShowFestivalDetails(festival))" Size="Size.Small" Class="flex-fill">
+                                    <i class="fas fa-eye me-1"></i>View Bands
+                                </Button>
+                                <AuthorizeView Roles="Admin, User" Context="userContext">
+                                    <Authorized>
+                                        <Button Color="Color.Success" Clicked="@(() => BookFestival(festival))" Size="Size.Small" Class="flex-fill">
+                                            <i class="fas fa-ticket-alt me-1"></i>Book Festival
+                                        </Button>
+                                    </Authorized>
+                                </AuthorizeView>
+                                <AuthorizeView Roles="Admin" Context="adminContext">
+                                    <Authorized>
+                                        <Button Color="Color.Secondary" Clicked="@(() => ShowEditModal(festival))" Size="Size.Small" Class="flex-fill">
+                                            <i class="fas fa-edit me-1"></i>Edit
+                                        </Button>
+                                        <Button Color="Color.Danger" Clicked="@(() => ShowDeleteConfirmation(festival))" Size="Size.Small" Class="flex-fill">
+                                            <i class="fas fa-trash me-1"></i>Delete
+                                        </Button>
+                                    </Authorized>
+                                </AuthorizeView>
+                             </ButtonGroup>
+                        </CardFooter>
+                    </Card>
+                </Column>
+            }
+        </Row>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <div>
+            <Text TextColor="TextColor.Muted" Style="color: white !important;">
+                Showing @Math.Min((currentPage - 1) * pageSize + 1, FilteredFestivals.Count()) to @Math.Min(currentPage * pageSize, FilteredFestivals.Count()) of @FilteredFestivals.Count() festivals
+            </Text>
+        </div>
+        <Pagination>
+            <PaginationItem Disabled="@(currentPage == 1)">
+                <PaginationLink Clicked="@(() => GoToPage(currentPage - 1))">
+                    <Icon Name="IconName.ChevronLeft" />
+                </PaginationLink>
+            </PaginationItem>
+
+            @for (int pageNo = Math.Max(1, currentPage - 2); pageNo <= TotalPages; pageNo++)
+            {
+                int pageNumber = pageNo;
+                <PaginationItem Active="@(pageNo == currentPage)">
+                    <PaginationLink Clicked="@(() => GoToPage(pageNumber))">
+                        @pageNumber
+                    </PaginationLink>
+                </PaginationItem>
+            }
+
+            <PaginationItem Disabled="@(currentPage == TotalPages)">
+                <PaginationLink Clicked="@(() => GoToPage(currentPage + 1))">
+                    <Icon Name="IconName.ChevronRight" />
+                </PaginationLink>
+            </PaginationItem>
+        </Pagination>
+    </div>
+}
 
 <!-- Band Details Modal -->
 <Modal @ref="bandDetailsModalRef">
@@ -398,9 +481,48 @@
         overflow-y: auto;
     }
 
-    .page-header p {
-        font-size: 2rem;
-        color: black;
+    /* Search input styling */
+    .search-input {
+        border-radius: 1rem;
+        padding: 0.75rem 1rem;
+        border: 2px solid rgba(112, 128, 144, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: var(--color-red);
+        box-shadow: 0 0 0 0.25rem rgba(229, 62, 62, 0.15);
+    }
+
+    /* Pagination styling */
+    .pagination {
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .pagination .page-link {
+        border: none;
+        background: rgba(254, 253, 249, 0.9);
+        color: var(--color-charcoal);
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        background: var(--color-red);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: var(--color-red);
+        color: white;
+        box-shadow: 0 4px 8px rgba(229, 62, 62, 0.3);
+    }
+
+    .pagination .page-item.disabled .page-link {
+        background: rgba(112, 128, 144, 0.2);
+        color: var(--color-muted-white);
     }
 </style>
 
@@ -433,6 +555,46 @@
     public Snackbar snackbar = default!;
     private string successMessage = string.Empty;
     private string errorMessage = string.Empty;
+
+    // Pagination and Search - Same as GetBands
+    private string searchTerm = string.Empty;
+    private int currentPage = 1;
+    private readonly int pageSize = 6;
+
+    private IEnumerable<Festival> FilteredFestivals =>
+        festivals.Where(f =>
+            string.IsNullOrEmpty(searchTerm) ||
+            f.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+            f.Location.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+            (!string.IsNullOrEmpty(f.Description) && f.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+
+    private IEnumerable<Festival> PaginatedFestivals =>
+        FilteredFestivals.Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+    private int TotalPages => (int)Math.Ceiling((double)FilteredFestivals.Count() / pageSize);
+
+    private async Task OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+        currentPage = 1; // Reset to first page when searching
+        await Task.CompletedTask;
+    }
+
+    private async Task ClearSearch()
+    {
+        searchTerm = string.Empty;
+        currentPage = 1;
+        await Task.CompletedTask;
+    }
+
+    private async Task GoToPage(int page)
+    {
+        if (page >= 1 && page <= TotalPages)
+        {
+            currentPage = page;
+            await Task.CompletedTask;
+        }
+    }
 
     void ValidateStartDate(ValidatorEventArgs e)
     {
